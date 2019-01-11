@@ -1,0 +1,78 @@
+{% import '@SyliusUi/Macro/pagination.html.twig' as pagination %}
+{% import '@SyliusUi/Macro/messages.html.twig' as messages %}
+
+{% extends '@SyliusShop/layout.html.twig' %}
+
+{% block content %}
+    <section class="list-controls">
+        <div class="container">
+            <form id="filter-form" method="get">
+                {#<div class="row">#}
+                    {#<div class="col-12 col-md-4">#}
+                        {#<select class="product-list-filter" name="brand">#}
+                            {#<option value="">{{ "app.ui.search.filter.brand"|trans }}</option>#}
+                            {#{% for brand in filters.brand %}#}
+                                {#<option value="{{ brand.text }}" {% if filters.selected.brand == brand.text %}selected{% endif %}>{{ brand.text }}</option>#}
+                            {#{% endfor %}#}
+                        {#</select>#}
+                    {#</div>#}
+                    {#<div class="col-12 col-md-4">#}
+                        {#<select class="product-list-filter" name="filter">#}
+                            {#<option value="">{{ "app.ui.search.filter.filter"|trans }}</option>#}
+                            {#<option value="sale">{{ 'app.ui.search.filter.option.sale'|trans }}</option>#}
+                        {#</select>#}
+                    {#</div>#}
+                    {#<div class="col-12 col-md-4">#}
+                        {#<select class="product-list-filter" name="size">#}
+                            {#<option value="">{{ "app.ui.search.filter.size"|trans }}</option>#}
+                            {#{% for size in filters.size %}#}
+                                {#<option value="{{ size.text }}" {% if filters.selected.size == size.text %}selected{% endif %}>{{ size.text }}</option>#}
+                            {#{% endfor %}#}
+                        {#</select>#}
+                    {#</div>#}
+                {#</div>#}
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        {% set resultStart = paginator.maxPerPage * paginator.currentPage - paginator.maxPerPage + 1 %}
+                        {% set resultEnd = min(paginator.nbResults, paginator.maxPerPage * paginator.currentPage) %}
+                        {{ 'app.ui.pagination.result'|trans({'%resultStart%': resultStart, '%resultEnd%': resultEnd, '%nbResults%': paginator.nbResults}) }}
+                    </div>
+                    <div class="col-12 col-md-6">
+                        {% include '@SyliusElasticsearchPlugin/_sorting.html.twig' %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="product-index">
+        <div class="container">
+            <div class="row">
+                {% if isCategory is defined and isCategory %}
+                    <div class="col-12 col-md-4 col-xl-3">{% include '@SyliusShop/Product/Index/_sidebar.html.twig' %}</div>
+                {% endif %}
+                <div class="col-12 {% if isCategory is defined and isCategory %}col-md-8 col-xl-9{% endif %}">
+                    {% if paginator|length > 0 %}
+                        <div class="ui three cards" id="products">
+                            {% for product in paginator %}
+                                {% include '@SyliusShop/Product/_box.html.twig' %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ messages.info('sylius.ui.no_results_to_display') }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    {{ pagination.simple(paginator, {
+                        'prev_message': '<span class="icon ion-ios-arrow-round-back"></span>',
+                        'next_message': '<span class="icon ion-ios-arrow-round-forward"></span>',
+                        'css_container_class': 'pagination',
+                        'css_item_class': 'page',
+                    }) }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

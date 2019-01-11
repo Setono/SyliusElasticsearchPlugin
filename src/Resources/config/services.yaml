@@ -1,0 +1,57 @@
+services:
+    setono_sylius_elasticsearch_plugin.string_formatter:
+        class: Setono\SyliusElasticsearchPlugin\Formatter\StringFormatter
+
+    setono_sylius_elasticsearch_plugin.property_builder.product_name:
+        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductNameBuilder
+        arguments:
+            - "@sylius.context.locale"
+        tags:
+            - { name: kernel.event_subscriber }
+
+    setono_sylius_elasticsearch_plugin.property_builder.option:
+        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\OptionBuilder
+        arguments:
+            - "@setono_sylius_elasticsearch_plugin.string_formatter"
+        tags:
+            - { name: kernel.event_subscriber }
+
+    setono_sylius_elasticsearch_plugin.property_builder.attribute:
+        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\AttributeBuilder
+        arguments:
+            - "@setono_sylius_elasticsearch_plugin.string_formatter"
+        tags:
+            - { name: kernel.event_subscriber }
+
+    setono_sylius_elasticsearch_plugin.property_builder.product_taxons:
+        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductTaxonsBuilder
+        arguments:
+            - "@setono_sylius_elasticsearch_plugin.property_builder.mapper.product_taxons"
+        tags:
+            - { name: kernel.event_subscriber }
+
+    setono_sylius_elasticsearch_plugin.property_builder.channels:
+        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ChannelsBuilder
+        tags:
+            - { name: kernel.event_subscriber }
+
+    setono_sylius_elasticsearch_plugin.property_builder.channel_pricing:
+        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ChannelPricingBuilder
+        tags:
+            - { name: kernel.event_subscriber }
+
+    setono_sylius_elasticsearch_plugin.property_builder.mapper.product_taxons:
+        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\Mapper\ProductTaxonsMapper
+
+    setono_sylius_elasticsearch_plugin.property_builder.loevgaard_brand:
+        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\LoevgaardBrandBuilder
+        arguments:
+            - "@service_container"
+        tags:
+            - { name: kernel.event_subscriber }
+
+    setono_sylius_elasticsearch_plugin.command.generate_config:
+        class: Setono\SyliusElasticsearchPlugin\Command\SyncElasticCommand
+        arguments:
+            - "@sylius.repository.channel"
+        tags: [console.command]

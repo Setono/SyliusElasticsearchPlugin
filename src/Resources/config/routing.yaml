@@ -1,0 +1,17 @@
+search_ajax:
+    path: /search/ajax/{queryString}
+    defaults: {queryString: ''}
+    controller: Setono\SyliusElasticsearchPlugin\Controller\SearchController::searchAjaxAction
+
+search_list:
+    path: /search/{queryString}
+    defaults: {queryString: ''}
+    controller: Setono\SyliusElasticsearchPlugin\Controller\SearchController::searchListAction
+
+sylius_shop_product_index:
+    path: /taxons/{slug}
+    methods: [GET]
+    defaults:
+        _controller: Setono\SyliusElasticsearchPlugin\Controller\SearchController::searchTaxonAction
+    requirements:
+        slug: .+

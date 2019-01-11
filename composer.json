@@ -1,0 +1,21 @@
+{
+    "name": "setono/sylius-elasticsearch-plugin",
+    "type": "sylius-plugin",
+    "description": "Elasticsearch plugin for Sylius",
+    "keywords": ["sylius", "elasticsearch", "search"],
+    "license": "MIT",
+    "require": {
+        "php": "^7.2",
+        "sylius/sylius": "^1.3.0",
+        "friendsofsymfony/elastica-bundle": "^5.0"
+    },
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Setono\\SyliusElasticsearchPlugin\\": "src/"
+        }
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
+}
