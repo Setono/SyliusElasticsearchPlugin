@@ -83,7 +83,7 @@ class SearchController extends Controller
      */
     public function searchListAction(Request $request, string $queryString): Response
     {
-        return $this->render('@SyliusElasticsearchPlugin/index.html.twig', [
+        return $this->render('@SetonoSyliusElasticsearchPlugin/index.html.twig', [
             'query' => $queryString,
             'paginator' => $this->search($request, $queryString),
             'filters' => $this->getAttributeFilterOptions($request),
@@ -105,7 +105,7 @@ class SearchController extends Controller
 
         $paginator = $this->search($request, '', $taxon->getCode());
 
-        return $this->render('@SyliusElasticsearchPlugin/index.html.twig', [
+        return $this->render('@SetonoSyliusElasticsearchPlugin/index.html.twig', [
             'isCategory' => true,
             'paginator' => $paginator,
             'filters' => $this->getAttributeFilterOptions($request),
