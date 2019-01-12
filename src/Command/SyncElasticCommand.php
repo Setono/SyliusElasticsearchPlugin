@@ -74,7 +74,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                 'clients' => [],
                 'indexes' => []
             ],
-            'sylius_elasticsearch' => [
+            'setono_sylius_elasticsearch' => [
                 'attributes' => [],
                 'finder_indexes' => [],
                 'index_configs' => []
@@ -219,7 +219,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                     ]
                 ]
             ];
-            $this->config['sylius_elasticsearch']['index_configs'][] = [
+            $this->config['setono_sylius_elasticsearch']['index_configs'][] = [
                 'index_name' => $indexName,
                 'type_name' => 'default',
                 'model_class' => '%sylius.model.product.class%'
@@ -269,7 +269,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                     ]
                 ]
             ];
-            $this->config['sylius_elasticsearch']['index_configs'][] = [
+            $this->config['setono_sylius_elasticsearch']['index_configs'][] = [
                 'index_name' => $indexName,
                 'type_name' => 'default',
                 'model_class' => '%sylius.model.taxon.class%'
@@ -286,7 +286,7 @@ class SyncElasticCommand extends ContainerAwareCommand
         while(true) {
             $attributeName = $this->io->ask('Do you want to add a product attribute? Leave empty to move on.');
             if($attributeName) {
-                $this->config['sylius_elasticsearch']['attributes'][] = $attributeName;
+                $this->config['setono_sylius_elasticsearch']['attributes'][] = $attributeName;
             } else {
                 break;
             }
@@ -299,8 +299,8 @@ class SyncElasticCommand extends ContainerAwareCommand
     protected function makeFinderIndexes()
     {
         foreach($this->getLocaleChannels() as $localeChannelCode) {
-            $this->config['sylius_elasticsearch']['finder_indexes'][$localeChannelCode]['products'] = "{$localeChannelCode}_products";
-            $this->config['sylius_elasticsearch']['finder_indexes'][$localeChannelCode]['taxons'] = "{$localeChannelCode}_taxons";
+            $this->config['setono_sylius_elasticsearch']['finder_indexes'][$localeChannelCode]['products'] = "{$localeChannelCode}_products";
+            $this->config['setono_sylius_elasticsearch']['finder_indexes'][$localeChannelCode]['taxons'] = "{$localeChannelCode}_taxons";
         }
     }
 }

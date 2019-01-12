@@ -120,7 +120,7 @@ class SearchController extends Controller
      */
     private function getProductFinder(): FinderInterface
     {
-        $index = $this->getParameter('sylius_elasticsearch.config')['finder_indexes'][strtolower("{$this->channel}_{$this->locale}")]['products'];
+        $index = $this->getParameter('setono_sylius_elasticsearch.config')['finder_indexes'][strtolower("{$this->channel}_{$this->locale}")]['products'];
         return $this->get("fos_elastica.finder.{$index}.default");
     }
 
@@ -131,7 +131,7 @@ class SearchController extends Controller
      */
     private function getTaxonFinder(): FinderInterface
     {
-        $index = $this->getParameter('sylius_elasticsearch.config')['finder_indexes'][strtolower("{$this->channel}_{$this->locale}")]['taxons'];
+        $index = $this->getParameter('setono_sylius_elasticsearch.config')['finder_indexes'][strtolower("{$this->channel}_{$this->locale}")]['taxons'];
         return $this->get("fos_elastica.finder.{$index}.default");
     }
 
@@ -150,7 +150,7 @@ class SearchController extends Controller
         $channelContext = $this->get('sylius.context.channel');
         $channel = $channelContext->getChannel();
 
-        $config = $this->container->getParameter('sylius_elasticsearch.config');
+        $config = $this->container->getParameter('setono_sylius_elasticsearch.config');
 
         /** @var ArrayGridProvider $gridProvider */
         $gridProvider = $this->get('sylius.grid.provider');
@@ -188,7 +188,7 @@ class SearchController extends Controller
         /** @var ProductAttributeValueRepositoryInterface $attributeValueRepository */
         $attributeValueRepository = $this->get('sylius.repository.product_attribute_value');
 
-        $config = $this->container->getParameter('sylius_elasticsearch.config');
+        $config = $this->container->getParameter('setono_sylius_elasticsearch.config');
 
         $return = ['selected' => []];
         foreach ($config['attributes'] as $attributeName) {

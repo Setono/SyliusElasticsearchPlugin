@@ -51,7 +51,7 @@ elasticsearch:
 Add following to your `services.yml` for defining which indexes the SearchController should be using for your entities.
 
 ```yaml
-sylius_elasticsearch:
+setono_sylius_elasticsearch:
     finder_indexes:
         products: yourprefix_products   # Default value: products
         taxons: yourprefix_taxons       # Default value: taxons
