@@ -50,7 +50,7 @@ abstract class AbstractBuilder implements PropertyBuilderInterface
     protected function getLocaleFromDocument(Document $document, LocaleContextInterface $localeContext)
     {
         $indexName = $document->getIndex();
-        if (preg_match("/.*_(\w{2})_(\w{2})/", $indexName, $matches)) {
+        if (preg_match("/.*_(\w{2})_(\w{2})_products/", $indexName, $matches)) {
             return $matches[1] . '_' . strtoupper($matches[2]);
         }
 
