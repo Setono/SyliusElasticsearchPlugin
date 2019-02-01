@@ -62,7 +62,7 @@ class SyncElasticCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output): void
     {
-        if(!$this->io->confirm('Please notice this command will delete and create a new "fos_elastica.yaml" file for you. Want to continue?', false)) {
+        if(!$this->io->confirm('Please notice this command will delete and create a new "fos_elastica.yaml" and "setono_sylius_elasticsearch.yaml" file for you. Want to continue?', false)) {
             exit;
         }
 
