@@ -270,10 +270,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                         ],
                         'persistence' => [
                             'driver' => 'orm',
-                            'model' =>'%sylius.model.product.class%',
-                            'provider' => [
-                                'query_builder_method' => 'createEnabledProductQueryBuilder'
-                            ],
+                            'model' =>'%sylius.model.taxon.class%',
                             'listener' => [
                                 'enabled' => false
                             ],
