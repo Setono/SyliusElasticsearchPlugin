@@ -7,28 +7,14 @@ namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductTranslation;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
 
 /**
  * This class is copied and altered from the BitBagCommerce/SyliusElasticsearchPlugin repo.
  */
-final class ProductNameBuilder extends AbstractBuilder
+final class ProductPropertiesBuilder extends AbstractBuilder
 {
-    /**
-     * @var LocaleContextInterface
-     */
-    private $localeContext;
-
-    /**
-     * ProductNameBuilder constructor.
-     *
-     * @param LocaleContextInterface $localeContext
-     */
-    public function __construct(LocaleContextInterface $localeContext)
-    {
-        $this->localeContext = $localeContext;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -36,8 +22,8 @@ final class ProductNameBuilder extends AbstractBuilder
     {
         $this->buildProperty($event, ProductInterface::class,
             function (ProductInterface $product, Document $document): void {
-                $locale = $this->getLocaleFromDocument($document, $this->localeContext);
-                $document->set('name', $product->getTranslation($locale)->getName());
+                $document->set('id', $product->getId());
+                $document->set('code', $product->getCode());
             }
         );
     }

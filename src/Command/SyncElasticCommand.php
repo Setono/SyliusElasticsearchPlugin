@@ -19,22 +19,8 @@ class SyncElasticCommand extends ContainerAwareCommand
     /** @var SymfonyStyle */
     protected $io;
 
-    /** @var ChannelRepositoryInterface */
-    protected $channelRepository;
-
     /** @var array */
     protected $config = [];
-
-    /**
-     * SyncElasticCommand constructor.
-     * @param ChannelRepositoryInterface $channelRepository
-     */
-    public function __construct(ChannelRepositoryInterface $channelRepository)
-    {
-        parent::__construct();
-
-        $this->channelRepository = $channelRepository;
-    }
 
     /**
      * @inheritdoc
@@ -72,8 +58,6 @@ class SyncElasticCommand extends ContainerAwareCommand
                 'indexes' => []
             ],
             'setono_sylius_elasticsearch' => [
-                'attributes' => [],
-                'finder_indexes' => [],
                 'index_configs' => []
             ]
         ];
@@ -81,8 +65,6 @@ class SyncElasticCommand extends ContainerAwareCommand
         $this->makeClient();
         $this->makeProductIndexes();
         $this->makeTaxonIndexes();
-        $this->makeAttributes();
-        $this->makeFinderIndexes();
         $this->saveConfigFiles();
     }
 
@@ -108,29 +90,13 @@ class SyncElasticCommand extends ContainerAwareCommand
     }
 
     /**
-     * Yields localized channel codes
-     *
-     * @return \Generator
-     */
-    protected function getLocaleChannels()
-    {
-        /** @var ChannelInterface $channel */
-        foreach($this->channelRepository->findAll() as $channel) {
-            /** @var LocaleInterface $locale */
-            foreach($channel->getLocales() as $locale) {
-                yield strtolower("{$channel->getCode()}_{$locale->getCode()}");
-            }
-        }
-    }
-
-    /**
      * Dialog for setting op client connection
      */
     protected function makeClient()
     {
         $this->config['fos_elastica']['clients']['default'] = [
-            'host' => $this->io->ask('Client hostname'),
-            'port' => intval($this->io->ask('Client port'))
+            'host' => $this->io->ask('Client hostname', 'elasticsearch'),
+            'port' => intval($this->io->ask('Client port', '9200'))
         ];
     }
 
@@ -142,32 +108,17 @@ class SyncElasticCommand extends ContainerAwareCommand
     protected function makeSettings()
     {
         return [
+            'mapping' => [
+                'total_fields' => [
+                    'limit' => 10000
+                ]
+            ],
             'analysis' => [
-                'char_filter' => [
-                    'dash_and_hyphens' => [
-                        'type' => 'mapping',
-                        'mappings' => ['-=>']
-                    ]
-                ],
-                'filter' => [
-                    'ngram' => [
-                        'type' => 'ngram',
-                        'min_gram' => 3,
-                        'max_gram' => 3,
-                        'token_chars' => [
-                            'letter',
-                            'digit'
-                        ]
-                    ]
-                ],
                 'analyzer' => [
-                    'autocomplete' => [
+                    'code_analyzer' => [
                         'type' => 'custom',
-                        'tokenizer' => 'standard',
-                        'char_filter' => 'dash_and_hyphens',
+                        'tokenizer' => 'whitespace',
                         'filter' => [
-                            'ngram',
-                            'lowercase',
                             'asciifolding',
                             'trim'
                         ]
@@ -182,64 +133,120 @@ class SyncElasticCommand extends ContainerAwareCommand
      */
     protected function makeProductIndexes()
     {
-        foreach($this->getLocaleChannels() as $localeChannelCode) {
-            $indexName = $localeChannelCode . '_products';
-            $this->config['fos_elastica']['indexes'][$indexName] = [
-                'settings' => $this->makeSettings(),
-                'types' => [
-                    'default' => [
-                        'properties' => [
-                            'description' => [
-                                'type' => 'text',
-                                'analyzer' => 'autocomplete'
-                            ],
-                            'shortDescription' => [
-                                'type' => 'text',
-                                'analyzer' => 'autocomplete'
-                            ],
-                            'metaKeywords' => [
-                                'type' => 'text',
-                                'analyzer' => 'autocomplete'
-                            ],
-                            'metaDescription' => [
-                                'type' => 'text',
-                                'analyzer' => 'autocomplete'
-                            ],
-                            'createdAt' => [
-                                'type' => 'date'
-                            ],
-                            'name' => [
-                                'type' => 'text',
-                                'boost' => 2,
-                                'fields' => [
-                                    'keyword' => [
-                                        'type' => 'keyword'
+        $this->config['fos_elastica']['indexes']['products'] = [
+            'settings' => $this->makeSettings(),
+            'types' => [
+                'default' => [
+                    'properties' => [
+                        'channels' => [
+                            'analyzer' => 'code_analyzer'
+                        ],
+                        'brand' => [
+                            'type' => 'nested',
+                            'properties' => [
+                                'code' => [
+                                    'type' => 'text',
+                                    'analyzer' => 'code_analyzer'
+                                ],
+                                'name' => [
+                                    'type' => 'keyword'
+                                ]
+                            ]
+                        ],
+                        'options' => [
+                            'type' => 'nested',
+                            'properties' => [
+                                'code' => [
+                                    'type' => 'text',
+                                    'analyzer' => 'code_analyzer',
+                                    'fielddata' => true,
+                                ],
+                                'value' => [
+                                    'type' => 'nested',
+                                    'properties' => [
+                                        'code' => [
+                                            'type' => 'text',
+                                            'analyzer' => 'code_analyzer',
+                                            'fielddata' => true,
+                                        ],
+                                        'locale' => [
+                                            'type' => 'text',
+                                            'analyzer' => 'code_analyzer'
+                                        ],
+                                        'name' => [
+                                            'type' => 'keyword'
+                                        ]
                                     ]
                                 ]
                             ]
                         ],
-                        'persistence' => [
-                            'driver' => 'orm',
-                            'model' =>'%sylius.model.product.class%',
-                            'provider' => [
-                                'query_builder_method' => 'createEnabledProductQueryBuilder'
-                            ],
-                            'listener' => [
-                                'enabled' => false
-                            ],
-                            'elastica_to_model_transformer' => [
-                                'ignore_missing' => true
+                        'attributes' => [
+                            'type' => 'nested',
+                            'properties' => [
+                                'code' => [
+                                    'type' => 'text',
+                                    'analyzer' => 'code_analyzer',
+                                    'fielddata' => true,
+                                ],
+                                'locale' => [
+                                    'type' => 'text',
+                                    'analyzer' => 'code_analyzer'
+                                ],
+                                'values' => [
+                                    'type' => 'nested',
+                                    'properties' => [
+                                        'code' => [
+                                            'type' => 'text',
+                                            'analyzer' => 'code_analyzer',
+                                            'fielddata' => true,
+                                        ],
+                                        'locale' => [
+                                            'type' => 'text',
+                                            'analyzer' => 'code_analyzer'
+                                        ],
+                                        'name' => [
+                                            'type' => 'keyword'
+                                        ]
+                                    ]
+                                ]
                             ]
+                        ],
+                        'prices' => [
+                            'type' => 'nested',
+                            'properties' => [
+                                'channel' => [
+                                    'type' => 'text',
+                                    'analyzer' => 'code_analyzer'
+                                ],
+                                'price' => [
+                                    'type' => 'integer',
+                                ]
+                            ]
+                        ],
+                    ],
+                    'persistence' => [
+                        'driver' => 'orm',
+                        'model' =>'%sylius.model.product.class%',
+                        'provider' => [
+                            'query_builder_method' => 'createEnabledProductQueryBuilder'
+                        ],
+                        'listener' => [
+                            'enabled' => false
+                        ],
+                        'elastica_to_model_transformer' => [
+                            'ignore_missing' => true
+                        ],
+                        'model_to_elastica_transformer' => [
+                            'service' => 'setono_sylius_elasticsearch_plugin.transformer.product_transformer'
                         ]
                     ]
                 ]
-            ];
-            $this->config['setono_sylius_elasticsearch']['index_configs'][] = [
-                'index_name' => $indexName,
-                'type_name' => 'default',
-                'model_class' => '%sylius.model.product.class%'
-            ];
-        }
+            ]
+        ];
+        $this->config['setono_sylius_elasticsearch']['index_configs']['products'] = [
+            'type_name' => 'default',
+            'model_class' => '%sylius.model.product.class%'
+        ];
     }
 
     /**
@@ -247,72 +254,40 @@ class SyncElasticCommand extends ContainerAwareCommand
      */
     protected function makeTaxonIndexes()
     {
-        foreach($this->getLocaleChannels() as $localeChannelCode) {
-            $indexName = $localeChannelCode . '_taxons';
-            $this->config['fos_elastica']['indexes'][$indexName] = [
-                'settings' => $this->makeSettings(),
-                'types' => [
-                    'default' => [
-                        'properties' => [
-                            'description' => [
-                                'type' => 'text',
-                                'analyzer' => 'autocomplete'
-                            ],
-                            'name' => [
-                                'type' => 'text',
-                                'fields' => [
-                                    'keyword' => [
-                                        'type' => 'keyword'
-                                    ]
-                                ]
-                            ],
-                            'slug' =>  null
+        $this->config['fos_elastica']['indexes']['taxons'] = [
+            'settings' => $this->makeSettings(),
+            'types' => [
+                'default' => [
+                    'properties' => [
+                        'description' => [
+                            'type' => 'text',
                         ],
-                        'persistence' => [
-                            'driver' => 'orm',
-                            'model' =>'%sylius.model.taxon.class%',
-                            'listener' => [
-                                'enabled' => false
-                            ],
-                            'elastica_to_model_transformer' => [
-                                'ignore_missing' => true
+                        'name' => [
+                            'type' => 'text',
+                            'fields' => [
+                                'keyword' => [
+                                    'type' => 'keyword'
+                                ]
                             ]
+                        ],
+                        'slug' =>  null
+                    ],
+                    'persistence' => [
+                        'driver' => 'orm',
+                        'model' =>'%sylius.model.taxon.class%',
+                        'listener' => [
+                            'enabled' => false
+                        ],
+                        'elastica_to_model_transformer' => [
+                            'ignore_missing' => true
                         ]
                     ]
                 ]
-            ];
-            $this->config['setono_sylius_elasticsearch']['index_configs'][] = [
-                'index_name' => $indexName,
-                'type_name' => 'default',
-                'model_class' => '%sylius.model.taxon.class%'
-            ];
-        }
-    }
-
-
-    /**
-     * Dialog for defining product attributes
-     */
-    protected function makeAttributes()
-    {
-        while(true) {
-            $attributeName = $this->io->ask('Do you want to add a product attribute? Leave empty to move on.');
-            if($attributeName) {
-                $this->config['setono_sylius_elasticsearch']['attributes'][] = $attributeName;
-            } else {
-                break;
-            }
-        }
-    }
-
-    /**
-     * Defines indexes for the elastic search finders
-     */
-    protected function makeFinderIndexes()
-    {
-        foreach($this->getLocaleChannels() as $localeChannelCode) {
-            $this->config['setono_sylius_elasticsearch']['finder_indexes'][$localeChannelCode]['products'] = "{$localeChannelCode}_products";
-            $this->config['setono_sylius_elasticsearch']['finder_indexes'][$localeChannelCode]['taxons'] = "{$localeChannelCode}_taxons";
-        }
+            ]
+        ];
+        $this->config['setono_sylius_elasticsearch']['index_configs']['taxons'] = [
+            'type_name' => 'default',
+            'model_class' => '%sylius.model.taxon.class%'
+        ];
     }
 }

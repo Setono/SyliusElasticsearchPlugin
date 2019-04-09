@@ -8,12 +8,6 @@ use Doctrine\ORM\QueryBuilder;
 
 trait ProductRepositoryTrait
 {
-    /**
-     * @param string $alias
-     * @param null   $indexBy
-     *
-     * @return QueryBuilder
-     */
     public function createEnabledProductQueryBuilder($alias, $indexBy = null): QueryBuilder
     {
         $qb = $this->createQueryBuilder($alias, $indexBy);

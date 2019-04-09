@@ -4,29 +4,17 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 
-use Setono\SyliusElasticsearchPlugin\Formatter\StringFormatterInterface;
 use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Product\Model\ProductOptionTranslationInterface;
+use Sylius\Component\Product\Model\ProductOptionValueTranslationInterface;
 
 /**
  * This class is copied and altered from the BitBagCommerce/SyliusElasticsearchPlugin repo.
  */
 final class OptionBuilder extends AbstractBuilder
 {
-    /**
-     * @var StringFormatterInterface
-     */
-    private $stringFormatter;
-
-    /**
-     * @param StringFormatterInterface $stringFormatter
-     */
-    public function __construct(StringFormatterInterface $stringFormatter)
-    {
-        $this->stringFormatter = $stringFormatter;
-    }
-
     /**
      * @param TransformEvent $event
      */
@@ -44,18 +32,44 @@ final class OptionBuilder extends AbstractBuilder
      */
     private function resolveProductOptions(ProductInterface $product, Document $document): void
     {
+        $options = [];
         foreach ($product->getVariants() as $productVariant) {
             foreach ($productVariant->getOptionValues() as $productOptionValue) {
                 if (empty($productOptionValue->getValue())) {
                     continue;
                 }
-                $index = 'option_' . $productOptionValue->getOption()->getCode();
-                $options = $document->has($index) ? $document->get($index) : [];
-                $value = $this->stringFormatter->formatToLowercaseWithoutSpaces($productOptionValue->getValue());
-                $options[] = $value;
 
-                $document->set($index, array_values(array_unique($options)));
+                $translations = [];
+                /** @var ProductOptionTranslationInterface $translation */
+                foreach($productOptionValue->getOption()->getTranslations() as $translation) {
+                    $translations[] = [
+                        'locale' => $translation->getLocale(),
+                        'name' => $translation->getName(),
+                    ];
+                }
+
+                $option = [
+                    'id' => $productOptionValue->getOption()->getId(),
+                    'code' => $productOptionValue->getOption()->getCode(),
+                    'translations' => $translations,
+                    'value' => []
+                ];
+
+                /** @var ProductOptionValueTranslationInterface $translation */
+                foreach($productOptionValue->getTranslations() as $translation) {
+                    $option['value'][] = [
+                        'code' => $productOptionValue->getCode(),
+                        'locale' => $translation->getLocale(),
+                        'name' => $translation->getValue(),
+                    ];
+                }
+
+                $options[] = $option;
             }
+        }
+
+        if(!empty($options)) {
+            $document->set('options', $options);
         }
     }
 }

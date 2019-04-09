@@ -6,9 +6,8 @@ namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 
 use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
-use Loevgaard\SyliusBrandPlugin\Entity\ProductTrait;
+use Loevgaard\SyliusBrandPlugin\Model\BrandAwareInterface;
 use Sylius\Component\Core\Model\ProductInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Support for LoevgaardSyliusBrandPlugin
@@ -16,36 +15,25 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 final class LoevgaardBrandBuilder extends AbstractBuilder
 {
     /**
-     * @var boolean
-     */
-    private $enabled = false;
-
-    /**
-     * @param ContainerInterface $container
-     */
-    public function __construct(ContainerInterface $container)
-    {
-        $bundles = $container->getParameter('kernel.bundles');
-        if (isset($bundles['LoevgaardSyliusBrandPlugin'])) {
-            $this->enabled = true;
-        }
-    }
-
-    /**
      * @param TransformEvent $event
      */
     public function consumeEvent(TransformEvent $event): void
     {
-        if ($this->enabled) {
-            $this->buildProperty($event, ProductInterface::class,
-                function (ProductInterface $product, Document $document): void {
-                    if ($product instanceof ProductTrait) {
-                        $brand = $product->getBrand();
+        $this->buildProperty($event, ProductInterface::class,
+            function (ProductInterface $product, Document $document): void {
+                if ($product instanceof BrandAwareInterface) {
+                    $brand = $product->getBrand();
 
-                        $document->set('brand', $brand->getName());
+                    if($brand !== null) {
+                        $document->set('brand', [
+                            'code' => $brand->getCode(),
+                            'name' => $brand->getName()
+                        ]);
+                    } else {
+                        $document->set('brand', []);
                     }
                 }
-            );
-        }
+            }
+        );
     }
 }

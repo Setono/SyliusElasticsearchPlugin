@@ -26,7 +26,8 @@ final class ChannelsBuilder extends AbstractBuilder
                     $channels[] = $channel->getCode();
                 }
 
-                $document->set('channel', $channels);
+                $document->setType('default');
+                $document->set('channels', $channels);
             }
         );
     }

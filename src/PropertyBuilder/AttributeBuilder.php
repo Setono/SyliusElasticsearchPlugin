@@ -4,29 +4,18 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 
-use Setono\SyliusElasticsearchPlugin\Formatter\StringFormatterInterface;
 use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Product\Model\ProductAttributeTranslationInterface;
+use Sylius\Component\Product\Model\ProductAttributeValue;
+use Sylius\Component\Product\Model\ProductOptionTranslation;
 
 /**
  * This class is copied and altered from the BitBagCommerce/SyliusElasticsearchPlugin repo.
  */
 final class AttributeBuilder extends AbstractBuilder
 {
-    /**
-     * @var StringFormatterInterface
-     */
-    private $stringFormatter;
-
-    /**
-     * @param StringFormatterInterface $stringFormatter
-     */
-    public function __construct(StringFormatterInterface $stringFormatter)
-    {
-        $this->stringFormatter = $stringFormatter;
-    }
-
     /**
      * @param TransformEvent $event
      */
@@ -44,24 +33,51 @@ final class AttributeBuilder extends AbstractBuilder
      */
     private function resolveProductAttributes(ProductInterface $product, Document $document): void
     {
-        foreach ($product->getAttributes() as $attributeValue) {
-            $index = $attributeValue->getAttribute()->getCode();
-            $value = $attributeValue->getValue();
-            $attributes = [];
-            if (empty($value)) {
-                continue;
+        $attributes = [];
+
+        /**
+         * @var ProductAttributeValue $attributeValue
+         */
+        foreach ($product->getAttributes()->getValues() as $attributeValue) {
+            $translations = [];
+            /** @var ProductOptionTranslation $translation */
+            foreach($attributeValue->getAttribute()->getTranslations() as $translation) {
+                $translations[] = [
+                    'locale' => $translation->getLocale(),
+                    'name' => $translation->getName()
+                ];
             }
 
-            if (is_array($value)) {
-                foreach ($value as $singleElement) {
-                    $attributes[] = $this->stringFormatter->formatToLowercaseWithoutSpaces((string) $singleElement);
+            $attribute = [
+                'id' => $attributeValue->getAttribute()->getId(),
+                'code' => $attributeValue->getAttribute()->getCode(),
+                'locale' => $attributeValue->getLocaleCode(),
+                'translations' => $translations,
+            ];
+
+            $value = $attributeValue->getValue();
+            if(is_array($value)) {
+                foreach($value as $selectItem) {
+                    foreach ($attributeValue->getAttribute()->getConfiguration()['choices'][$selectItem] as $localeCode => $value)
+                    {
+                        $attribute['values'][] = [
+                            'code' => $selectItem,
+                            'locale' => $localeCode,
+                            'name' => $value
+                        ];
+                    }
                 }
             } else {
-                $value = is_string($value) ? $this->stringFormatter->formatToLowercaseWithoutSpaces($value) : $value;
-                $attributes[] = $value;
+                $attribute['values'][] = [
+                    'code' => $value,
+                    'locale' => $attributeValue->getLocaleCode(),
+                    'name' => $value
+                ];
             }
 
-            $document->set('attribute_' . $index, $attributes);
+            $attributes[] = $attribute;
         }
+
+        $document->set('attributes', $attributes);
     }
 }
