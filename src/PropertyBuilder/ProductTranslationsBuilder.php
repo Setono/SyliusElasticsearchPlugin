@@ -8,7 +8,6 @@ use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductTranslation;
-use Sylius\Component\Locale\Context\LocaleContextInterface;
 
 /**
  * This class is copied and altered from the BitBagCommerce/SyliusElasticsearchPlugin repo.
@@ -36,14 +35,14 @@ final class ProductTranslationsBuilder extends AbstractBuilder
         $translations = [];
 
         /** @var ProductTranslation $translation */
-        foreach($product->getTranslations() as $translation) {
+        foreach ($product->getTranslations() as $translation) {
             $translations[$translation->getLocale()] = [
-                'name'              => $translation->getName(),
-                'slug'              => $translation->getSlug(),
-                'description'       => $translation->getDescription(),
-                'shortDescription'  => $translation->getShortDescription(),
-                'metaKeywords'      => $translation->getMetaKeywords(),
-                'metaDescription'   => $translation->getMetaDescription(),
+                'name' => $translation->getName(),
+                'slug' => $translation->getSlug(),
+                'description' => $translation->getDescription(),
+                'shortDescription' => $translation->getShortDescription(),
+                'metaKeywords' => $translation->getMetaKeywords(),
+                'metaDescription' => $translation->getMetaDescription(),
             ];
         }
 

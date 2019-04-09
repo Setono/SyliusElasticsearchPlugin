@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\Repository;
 
+use Elastica\Aggregation\Filter as AggregationFilter;
+use Elastica\Aggregation\Max as AggregationMax;
+use Elastica\Aggregation\Min as AggregationMin;
+use Elastica\Aggregation\Nested as AggregationNested;
+use Elastica\Aggregation\Terms as AggregationTerms;
+use Elastica\Aggregation\TopHits as AggregationTopHits;
 use Elastica\Query;
 use Elastica\Query\BoolQuery;
-use Elastica\Query\Term;
-use Elastica\Query\Terms;
 use Elastica\Query\Match;
 use Elastica\Query\Nested;
 use Elastica\Query\Range;
-use Elastica\Aggregation\Nested as AggregationNested;
-use Elastica\Aggregation\Filter as AggregationFilter;
-use Elastica\Aggregation\Terms as AggregationTerms;
-use Elastica\Aggregation\Min as AggregationMin;
-use Elastica\Aggregation\Max as AggregationMax;
-use Elastica\Aggregation\TopHits as AggregationTopHits;
+use Elastica\Query\Term;
+use Elastica\Query\Terms;
 use Sylius\Component\Channel\Model\ChannelInterface;
 use Sylius\Component\Core\Model\TaxonInterface;
-
 
 class ElasticSearchRepository
 {
@@ -61,7 +60,7 @@ class ElasticSearchRepository
     public function whereOptions(array $options)
     {
         foreach ($options as $optionCode => $values) {
-            if(!is_array($values)) {
+            if (!is_array($values)) {
                 continue;
             }
 
@@ -87,7 +86,7 @@ class ElasticSearchRepository
     public function whereAttributes(array $attributes, string $localeCode)
     {
         foreach ($attributes as $attributesCode => $values) {
-            if(!is_array($values)) {
+            if (!is_array($values)) {
                 continue;
             }
 
@@ -117,7 +116,7 @@ class ElasticSearchRepository
         $boolQuery->addMust(new Match('prices.channel', $channel->getCode()));
         $boolQuery->addMust(new Range('prices.price', [
             'gte' => $gte,
-            'lte' => $lte
+            'lte' => $lte,
         ]));
 
         $nested = new Nested();
@@ -172,7 +171,6 @@ class ElasticSearchRepository
         $optionsAggregation->addAggregation($optionsTypeAggregation);
         $query->addAggregation($optionsAggregation);
 
-
         $attributesValueHitsAggregation = new AggregationTopHits('value_hits');
         $attributesValueHitsAggregation->setSize(1);
         $attributesValueHitsAggregation->setSource(['includes' => ['attributes.values.name', 'attributes.values.code']]);
@@ -202,7 +200,7 @@ class ElasticSearchRepository
     {
         $query = new Query($this->boolQuery);
 
-        if($resetQueue) {
+        if ($resetQueue) {
             $this->resetQuery();
         }
 

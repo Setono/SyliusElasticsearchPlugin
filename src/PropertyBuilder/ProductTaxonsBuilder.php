@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 
-use Setono\SyliusElasticsearchPlugin\PropertyBuilder\Mapper\ProductTaxonsMapperInterface;
 use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
@@ -23,7 +22,7 @@ final class ProductTaxonsBuilder extends AbstractBuilder
             function (ProductInterface $product, Document $document): void {
                 $taxons = [];
 
-                foreach($product->getTaxons() as $taxon) {
+                foreach ($product->getTaxons() as $taxon) {
                     $taxons[] = $taxon->getId();
                 }
 

@@ -4,15 +4,11 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\Command;
 
-use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
-use Sylius\Component\Core\Model\ChannelInterface;
-use Sylius\Component\Locale\Model\LocaleInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Yaml\Yaml;
-
 
 class SyncElasticCommand extends ContainerAwareCommand
 {
@@ -23,7 +19,7 @@ class SyncElasticCommand extends ContainerAwareCommand
     protected $config = [];
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function configure()
     {
@@ -33,7 +29,7 @@ class SyncElasticCommand extends ContainerAwareCommand
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
@@ -44,22 +40,22 @@ class SyncElasticCommand extends ContainerAwareCommand
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output): void
     {
-        if(!$this->io->confirm('Please notice this command will delete and create a new "fos_elastica.yaml" and "setono_sylius_elasticsearch.yaml" file for you. Want to continue?', false)) {
+        if (!$this->io->confirm('Please notice this command will delete and create a new "fos_elastica.yaml" and "setono_sylius_elasticsearch.yaml" file for you. Want to continue?', false)) {
             exit;
         }
 
         $this->config = [
             'fos_elastica' => [
                 'clients' => [],
-                'indexes' => []
+                'indexes' => [],
             ],
             'setono_sylius_elasticsearch' => [
-                'index_configs' => []
-            ]
+                'index_configs' => [],
+            ],
         ];
 
         $this->makeClient();
@@ -86,7 +82,7 @@ class SyncElasticCommand extends ContainerAwareCommand
         file_put_contents($syliusElasticsearchYamlFilePath, $content);
         $this->io->success("Generated new config file: {$syliusElasticsearchYamlFilePath}");
 
-        $this->io->success("You can now run \"fos:elastica:populate\".");
+        $this->io->success('You can now run "fos:elastica:populate".');
     }
 
     /**
@@ -96,7 +92,7 @@ class SyncElasticCommand extends ContainerAwareCommand
     {
         $this->config['fos_elastica']['clients']['default'] = [
             'host' => $this->io->ask('Client hostname', 'elasticsearch'),
-            'port' => intval($this->io->ask('Client port', '9200'))
+            'port' => (int) ($this->io->ask('Client port', '9200')),
         ];
     }
 
@@ -110,8 +106,8 @@ class SyncElasticCommand extends ContainerAwareCommand
         return [
             'mapping' => [
                 'total_fields' => [
-                    'limit' => 10000
-                ]
+                    'limit' => 10000,
+                ],
             ],
             'analysis' => [
                 'analyzer' => [
@@ -120,11 +116,11 @@ class SyncElasticCommand extends ContainerAwareCommand
                         'tokenizer' => 'whitespace',
                         'filter' => [
                             'asciifolding',
-                            'trim'
-                        ]
-                    ]
-                ]
-            ]
+                            'trim',
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -139,19 +135,19 @@ class SyncElasticCommand extends ContainerAwareCommand
                 'default' => [
                     'properties' => [
                         'channels' => [
-                            'analyzer' => 'code_analyzer'
+                            'analyzer' => 'code_analyzer',
                         ],
                         'brand' => [
                             'type' => 'nested',
                             'properties' => [
                                 'code' => [
                                     'type' => 'text',
-                                    'analyzer' => 'code_analyzer'
+                                    'analyzer' => 'code_analyzer',
                                 ],
                                 'name' => [
-                                    'type' => 'keyword'
-                                ]
-                            ]
+                                    'type' => 'keyword',
+                                ],
+                            ],
                         ],
                         'options' => [
                             'type' => 'nested',
@@ -171,14 +167,14 @@ class SyncElasticCommand extends ContainerAwareCommand
                                         ],
                                         'locale' => [
                                             'type' => 'text',
-                                            'analyzer' => 'code_analyzer'
+                                            'analyzer' => 'code_analyzer',
                                         ],
                                         'name' => [
-                                            'type' => 'keyword'
-                                        ]
-                                    ]
-                                ]
-                            ]
+                                            'type' => 'keyword',
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                         'attributes' => [
                             'type' => 'nested',
@@ -190,7 +186,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                                 ],
                                 'locale' => [
                                     'type' => 'text',
-                                    'analyzer' => 'code_analyzer'
+                                    'analyzer' => 'code_analyzer',
                                 ],
                                 'values' => [
                                     'type' => 'nested',
@@ -202,50 +198,50 @@ class SyncElasticCommand extends ContainerAwareCommand
                                         ],
                                         'locale' => [
                                             'type' => 'text',
-                                            'analyzer' => 'code_analyzer'
+                                            'analyzer' => 'code_analyzer',
                                         ],
                                         'name' => [
-                                            'type' => 'keyword'
-                                        ]
-                                    ]
-                                ]
-                            ]
+                                            'type' => 'keyword',
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                         'prices' => [
                             'type' => 'nested',
                             'properties' => [
                                 'channel' => [
                                     'type' => 'text',
-                                    'analyzer' => 'code_analyzer'
+                                    'analyzer' => 'code_analyzer',
                                 ],
                                 'price' => [
                                     'type' => 'integer',
-                                ]
-                            ]
+                                ],
+                            ],
                         ],
                     ],
                     'persistence' => [
                         'driver' => 'orm',
-                        'model' =>'%sylius.model.product.class%',
+                        'model' => '%sylius.model.product.class%',
                         'provider' => [
-                            'query_builder_method' => 'createEnabledProductQueryBuilder'
+                            'query_builder_method' => 'createEnabledProductQueryBuilder',
                         ],
                         'listener' => [
-                            'enabled' => false
+                            'enabled' => false,
                         ],
                         'elastica_to_model_transformer' => [
-                            'ignore_missing' => true
+                            'ignore_missing' => true,
                         ],
                         'model_to_elastica_transformer' => [
-                            'service' => 'setono_sylius_elasticsearch_plugin.transformer.product_transformer'
-                        ]
-                    ]
-                ]
-            ]
+                            'service' => 'setono_sylius_elasticsearch_plugin.transformer.product_transformer',
+                        ],
+                    ],
+                ],
+            ],
         ];
         $this->config['setono_sylius_elasticsearch']['index_configs']['products'] = [
             'type_name' => 'default',
-            'model_class' => '%sylius.model.product.class%'
+            'model_class' => '%sylius.model.product.class%',
         ];
     }
 
@@ -266,28 +262,28 @@ class SyncElasticCommand extends ContainerAwareCommand
                             'type' => 'text',
                             'fields' => [
                                 'keyword' => [
-                                    'type' => 'keyword'
-                                ]
-                            ]
+                                    'type' => 'keyword',
+                                ],
+                            ],
                         ],
-                        'slug' =>  null
+                        'slug' => null,
                     ],
                     'persistence' => [
                         'driver' => 'orm',
-                        'model' =>'%sylius.model.taxon.class%',
+                        'model' => '%sylius.model.taxon.class%',
                         'listener' => [
-                            'enabled' => false
+                            'enabled' => false,
                         ],
                         'elastica_to_model_transformer' => [
-                            'ignore_missing' => true
-                        ]
-                    ]
-                ]
-            ]
+                            'ignore_missing' => true,
+                        ],
+                    ],
+                ],
+            ],
         ];
         $this->config['setono_sylius_elasticsearch']['index_configs']['taxons'] = [
             'type_name' => 'default',
-            'model_class' => '%sylius.model.taxon.class%'
+            'model_class' => '%sylius.model.taxon.class%',
         ];
     }
 }

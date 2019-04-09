@@ -7,7 +7,6 @@ namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
-use Sylius\Component\Product\Model\ProductAttributeTranslationInterface;
 use Sylius\Component\Product\Model\ProductAttributeValue;
 use Sylius\Component\Product\Model\ProductOptionTranslation;
 
@@ -36,15 +35,15 @@ final class AttributeBuilder extends AbstractBuilder
         $attributes = [];
 
         /**
-         * @var ProductAttributeValue $attributeValue
+         * @var ProductAttributeValue
          */
         foreach ($product->getAttributes()->getValues() as $attributeValue) {
             $translations = [];
             /** @var ProductOptionTranslation $translation */
-            foreach($attributeValue->getAttribute()->getTranslations() as $translation) {
+            foreach ($attributeValue->getAttribute()->getTranslations() as $translation) {
                 $translations[] = [
                     'locale' => $translation->getLocale(),
-                    'name' => $translation->getName()
+                    'name' => $translation->getName(),
                 ];
             }
 
@@ -56,14 +55,13 @@ final class AttributeBuilder extends AbstractBuilder
             ];
 
             $value = $attributeValue->getValue();
-            if(is_array($value)) {
-                foreach($value as $selectItem) {
-                    foreach ($attributeValue->getAttribute()->getConfiguration()['choices'][$selectItem] as $localeCode => $value)
-                    {
+            if (is_array($value)) {
+                foreach ($value as $selectItem) {
+                    foreach ($attributeValue->getAttribute()->getConfiguration()['choices'][$selectItem] as $localeCode => $value) {
                         $attribute['values'][] = [
                             'code' => $selectItem,
                             'locale' => $localeCode,
-                            'name' => $value
+                            'name' => $value,
                         ];
                     }
                 }
@@ -71,7 +69,7 @@ final class AttributeBuilder extends AbstractBuilder
                 $attribute['values'][] = [
                     'code' => $value,
                     'locale' => $attributeValue->getLocaleCode(),
-                    'name' => $value
+                    'name' => $value,
                 ];
             }
 

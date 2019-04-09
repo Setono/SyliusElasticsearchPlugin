@@ -41,7 +41,7 @@ final class OptionBuilder extends AbstractBuilder
 
                 $translations = [];
                 /** @var ProductOptionTranslationInterface $translation */
-                foreach($productOptionValue->getOption()->getTranslations() as $translation) {
+                foreach ($productOptionValue->getOption()->getTranslations() as $translation) {
                     $translations[] = [
                         'locale' => $translation->getLocale(),
                         'name' => $translation->getName(),
@@ -52,11 +52,11 @@ final class OptionBuilder extends AbstractBuilder
                     'id' => $productOptionValue->getOption()->getId(),
                     'code' => $productOptionValue->getOption()->getCode(),
                     'translations' => $translations,
-                    'value' => []
+                    'value' => [],
                 ];
 
                 /** @var ProductOptionValueTranslationInterface $translation */
-                foreach($productOptionValue->getTranslations() as $translation) {
+                foreach ($productOptionValue->getTranslations() as $translation) {
                     $option['value'][] = [
                         'code' => $productOptionValue->getCode(),
                         'locale' => $translation->getLocale(),
@@ -68,7 +68,7 @@ final class OptionBuilder extends AbstractBuilder
             }
         }
 
-        if(!empty($options)) {
+        if (!empty($options)) {
             $document->set('options', $options);
         }
     }

@@ -24,10 +24,10 @@ final class LoevgaardBrandBuilder extends AbstractBuilder
                 if ($product instanceof BrandAwareInterface) {
                     $brand = $product->getBrand();
 
-                    if($brand !== null) {
+                    if ($brand !== null) {
                         $document->set('brand', [
                             'code' => $brand->getCode(),
-                            'name' => $brand->getName()
+                            'name' => $brand->getName(),
                         ]);
                     } else {
                         $document->set('brand', []);

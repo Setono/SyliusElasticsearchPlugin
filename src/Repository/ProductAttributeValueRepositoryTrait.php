@@ -19,6 +19,7 @@ trait ProductAttributeValueRepositoryTrait
             ->setParameter('attributeCode', $attributeCode)
             ->setParameter('locale', $locale)
             ->getQuery();
+
         return $query->getOneOrNullResult();
     }
 }

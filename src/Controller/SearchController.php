@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\Controller;
 
-use Doctrine\ORM\EntityNotFoundException;
-use Setono\SyliusElasticsearchPlugin\Model\ElasticsearchQueryConfiguration;
-use FOS\ElasticaBundle\Finder\FinderInterface;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use Pagerfanta\Pagerfanta;
 use Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository;
-use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 use Sylius\Bundle\TaxonomyBundle\Doctrine\ORM\TaxonRepository;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Core\Model\Taxon;
 use Sylius\Component\Grid\Provider\ArrayGridProvider;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
-use Setono\SyliusElasticsearchPlugin\Repository\ProductAttributeValueRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -53,8 +48,7 @@ class SearchController extends Controller
                                 LocaleContextInterface $localeContext,
                                 ChannelContextInterface $channelContext,
                                 ElasticSearchRepository $elasticSearchTaxonRepository
-    )
-    {
+    ) {
         $this->productFinder = $productFinder;
         $this->taxonFinder = $taxonFinder;
         $this->localeContext = $localeContext;
@@ -122,24 +116,24 @@ class SearchController extends Controller
             ->whereTaxon($taxon);
 
         $brands = $request->get('brands');
-        if(is_array($brands)) {
+        if (is_array($brands)) {
             $this->elasticSearchTaxonRepository->whereBrands($brands);
         }
 
         $options = $request->get('options');
-        if(is_array($options)) {
+        if (is_array($options)) {
             $this->elasticSearchTaxonRepository->whereOptions($options);
         }
 
         $attributes = $request->get('attributes');
-        if(is_array($attributes)) {
+        if (is_array($attributes)) {
             $this->elasticSearchTaxonRepository->whereAttributes($attributes, $this->localeContext->getLocaleCode());
         }
 
         $priceFrom = $request->get('price_from');
         $priceTo = $request->get('price_to');
-        if($priceFrom && $priceTo) {
-            $this->elasticSearchTaxonRepository->whereChannelPrice(intval($priceFrom), intval($priceTo), $this->channelContext->getChannel());
+        if ($priceFrom && $priceTo) {
+            $this->elasticSearchTaxonRepository->whereChannelPrice((int) $priceFrom, (int) $priceTo, $this->channelContext->getChannel());
         }
 
         $paginator = $this->paginateProducts($request, $this->elasticSearchTaxonRepository->getQuery());
@@ -152,7 +146,7 @@ class SearchController extends Controller
             'isCategory' => true,
             'paginator' => $paginator,
             'filters' => $filters,
-            'taxon' => $taxon
+            'taxon' => $taxon,
         ]);
     }
 
@@ -170,7 +164,6 @@ class SearchController extends Controller
         /** @var ArrayGridProvider $gridProvider */
         $gridProvider = $this->get('sylius.grid.provider');
         $grid = $gridProvider->get('sylius_shop_product');
-
 
         $paginator = $this->productFinder->findPaginated('*' . $queryString . '*');
         $paginator->setMaxPerPage($request->get('limit', $grid->getLimits()[0]));

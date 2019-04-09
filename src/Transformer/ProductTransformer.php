@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Setono\SyliusElasticsearchPlugin\Transformer;
 
 use FOS\ElasticaBundle\Transformer\ModelToElasticaAutoTransformer;
