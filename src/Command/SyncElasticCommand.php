@@ -134,6 +134,20 @@ class SyncElasticCommand extends ContainerAwareCommand
             'types' => [
                 'default' => [
                     'properties' => [
+                        'translations' => [
+                            'type' => 'nested',
+                            'properties' => [
+                                'name' => [
+                                    'type' => 'text',
+                                    'boost' => 2,
+                                    'fields' => [
+                                        'keyword' => [
+                                            'type' => 'keyword'
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ],
                         'channels' => [
                             'analyzer' => 'code_analyzer',
                         ],
@@ -141,8 +155,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                             'type' => 'nested',
                             'properties' => [
                                 'code' => [
-                                    'type' => 'text',
-                                    'analyzer' => 'code_analyzer',
+                                    'type' => 'keyword',
                                 ],
                                 'name' => [
                                     'type' => 'keyword',
@@ -218,6 +231,9 @@ class SyncElasticCommand extends ContainerAwareCommand
                                     'type' => 'integer',
                                 ],
                             ],
+                        ],
+                        'createdAt' => [
+                            'type' => 'date'
                         ],
                     ],
                     'persistence' => [

@@ -1,5 +1,7 @@
 app:
   ui:
+    brand: Mærke
+    price: Pris
     pagination:
       result: Viser %resultStart% - %resultEnd% af %nbResults% produkter
       previous: Tilbage

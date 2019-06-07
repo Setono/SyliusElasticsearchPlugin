@@ -10,10 +10,6 @@
         "friendsofsymfony/elastica-bundle": "dev-master"
     },
     "require-dev": {
-        "phpstan/phpstan-doctrine": "^0.10",
-        "phpstan/phpstan-shim": "^0.10",
-        "phpstan/phpstan-symfony": "^0.10",
-        "phpstan/phpstan-webmozart-assert": "^0.10",
         "sylius-labs/coding-standard": "^2.0"
     },
     "prefer-stable": true,
@@ -24,10 +20,6 @@
     },
     "scripts": {
         "check-style": "./vendor/bin/ecs check src/",
-        "fix-style": "./vendor/bin/ecs check --fix src/",
-        "analyse": [
-            "@ensure-test-container-exists",
-            "./vendor/bin/phpstan analyse -c phpstan.neon -l max src"
-        ]
+        "fix-style": "./vendor/bin/ecs check --fix src/"
     }
 }

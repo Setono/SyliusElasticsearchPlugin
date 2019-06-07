@@ -25,6 +25,9 @@ class ElasticSearchRepository
     /** @var BoolQuery */
     private $boolQuery;
 
+    /** @var array */
+    private $sort = [];
+
     public function __construct()
     {
         $this->resetQuery();
@@ -127,6 +130,46 @@ class ElasticSearchRepository
         return $this;
     }
 
+    public function sortByCreated(string $direction) {
+        $this->sort[] = [
+            'createdAt' => [
+                'order' => $direction
+            ]
+        ];
+    }
+
+    public function sortByProductName(string $direction, string $localeCode) {
+        $this->sort[] = [
+            'translations.name.keyword' => [
+                'order' => $direction,
+                'nested' => [
+                    'path' => 'translations',
+                    'filter' => [
+                        'match' => [
+                            'translations.locale' => $localeCode
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    public function sortByPrice(string $direction, ChannelInterface $channel) {
+        $this->sort[] = [
+            'prices.price' => [
+                'order' => $direction,
+                'nested' => [
+                    'path' => 'prices',
+                    'filter' => [
+                        'term' => [
+                            'prices.channel' => $channel->getCode()
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
     public function getAvailableFilters(ChannelInterface $channel, string $localeCode, TaxonInterface $taxon)
     {
         $query = $this->whereChannel($channel)
@@ -199,34 +242,14 @@ class ElasticSearchRepository
     public function getQuery(bool $resetQueue = true): Query
     {
         $query = new Query($this->boolQuery);
+        if (!empty($this->sort)) {
+            $query->setSort($this->sort);
+        }
 
         if ($resetQueue) {
             $this->resetQuery();
         }
 
         return $query;
-    }
-
-    /**
-     * Adds sorting to the query, if any is defined
-     *
-     * @param Query $query
-     */
-    private function addSorting(&$query)
-    {
-        $sorting = $this->request->get('sorting', []);
-        if (!empty($sorting)) {
-            $sortColumn = key($sorting);
-            $direction = $sorting[$sortColumn];
-
-            // For text types, sort in the keyword column instead.
-            if (in_array($sortColumn, ['name'])) {
-                $sortColumn = "$sortColumn.keyword";
-            }
-
-            $query->addSort([
-                $sortColumn => ['order' => $direction],
-            ]);
-        }
     }
 }

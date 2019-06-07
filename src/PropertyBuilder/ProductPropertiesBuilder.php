@@ -22,6 +22,7 @@ final class ProductPropertiesBuilder extends AbstractBuilder
             function (ProductInterface $product, Document $document): void {
                 $document->set('id', $product->getId());
                 $document->set('code', $product->getCode());
+                $document->set('createdAt', $product->getCreatedAt()->format(DATE_ATOM));
             }
         );
     }

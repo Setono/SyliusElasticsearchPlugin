@@ -36,7 +36,8 @@ final class ProductTranslationsBuilder extends AbstractBuilder
 
         /** @var ProductTranslation $translation */
         foreach ($product->getTranslations() as $translation) {
-            $translations[$translation->getLocale()] = [
+            $translations[] = [
+                'locale' => $translation->getLocale(),
                 'name' => $translation->getName(),
                 'slug' => $translation->getSlug(),
                 'description' => $translation->getDescription(),

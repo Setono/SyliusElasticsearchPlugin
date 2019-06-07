@@ -9,6 +9,9 @@ services:
   Setono\SyliusElasticsearchPlugin\Controller\SearchController:
     public: true
     arguments:
+      - "@sylius.repository.taxon"
+      - "@sylius.repository.product_option"
+      - "@sylius.repository.product_attribute"
       - "@fos_elastica.finder.products.default"
       - "@fos_elastica.finder.taxons.default"
       - "@sylius.context.locale"
