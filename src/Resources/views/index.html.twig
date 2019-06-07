@@ -1,78 +1,200 @@
-{% import '@SyliusUi/Macro/pagination.html.twig' as pagination %}
 {% import '@SyliusUi/Macro/messages.html.twig' as messages %}
-
 {% extends '@SyliusShop/layout.html.twig' %}
 
 {% block content %}
-    <section class="list-controls">
-        <div class="container">
-            <form id="filter-form" method="get">
-                {#<div class="row">#}
-                    {#<div class="col-12 col-md-4">#}
-                        {#<select class="product-list-filter" name="brand">#}
-                            {#<option value="">{{ "app.ui.search.filter.brand"|trans }}</option>#}
-                            {#{% for brand in filters.brand %}#}
-                                {#<option value="{{ brand.text }}" {% if filters.selected.brand == brand.text %}selected{% endif %}>{{ brand.text }}</option>#}
-                            {#{% endfor %}#}
-                        {#</select>#}
-                    {#</div>#}
-                    {#<div class="col-12 col-md-4">#}
-                        {#<select class="product-list-filter" name="filter">#}
-                            {#<option value="">{{ "app.ui.search.filter.filter"|trans }}</option>#}
-                            {#<option value="sale">{{ 'app.ui.search.filter.option.sale'|trans }}</option>#}
-                        {#</select>#}
-                    {#</div>#}
-                    {#<div class="col-12 col-md-4">#}
-                        {#<select class="product-list-filter" name="size">#}
-                            {#<option value="">{{ "app.ui.search.filter.size"|trans }}</option>#}
-                            {#{% for size in filters.size %}#}
-                                {#<option value="{{ size.text }}" {% if filters.selected.size == size.text %}selected{% endif %}>{{ size.text }}</option>#}
-                            {#{% endfor %}#}
-                        {#</select>#}
-                    {#</div>#}
-                {#</div>#}
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        {% set resultStart = paginator.maxPerPage * paginator.currentPage - paginator.maxPerPage + 1 %}
-                        {% set resultEnd = min(paginator.nbResults, paginator.maxPerPage * paginator.currentPage) %}
-                        {{ 'app.ui.pagination.result'|trans({'%resultStart%': resultStart, '%resultEnd%': resultEnd, '%nbResults%': paginator.nbResults}) }}
-                    </div>
-                    <div class="col-12 col-md-6">
-                        {% include '@SetonoSyliusElasticsearchPlugin/_sorting.html.twig' %}
-                    </div>
-                </div>
-            </form>
-        </div>
-    </section>
-    <section class="product-index">
-        <div class="container">
-            <div class="row">
-                {% if isCategory is defined and isCategory %}
-                    <div class="col-12 col-md-4 col-xl-3">{% include '@SyliusShop/Product/Index/_sidebar.html.twig' %}</div>
-                {% endif %}
-                <div class="col-12 {% if isCategory is defined and isCategory %}col-md-8 col-xl-9{% endif %}">
-                    {% if paginator|length > 0 %}
-                        <div class="ui three cards" id="products">
-                            {% for product in paginator %}
-                                {% include '@SyliusShop/Product/_box.html.twig' %}
+
+    {% if results.nbResults > 0 %}
+
+        {% if filters is defined %}
+            <section class="taxon-filters">
+                <form action="#" method="get" id="filters">
+                    <input type="hidden" name="sort_field" value="">
+                    <input type="hidden" name="sort_direction" value="">
+
+                    <div class="container">
+                        <div class="filters">
+                            {% for type, filter in filters %}
+                                {% if type == "brands" %}
+                                    <div class="ui filter-dropdown compact menu">
+                                        <div class="ui simple dropdown item">
+                                            {{ 'app.ui.brand'|trans }} <i class="dropdown icon"></i>
+                                            <div class="menu">
+                                                <button class="btn filter-clear-selected" type="button">Ryd filter</button>
+                                                <div class="filter-selected">
+                                                    <div class="filter-selected-number"><span>0</span> valgte</div>
+                                                </div>
+                                                <div class="filter-select">
+                                                    {% for brand in filter.code.buckets %}
+                                                        <label class="filter-select-item">
+                                                            <input type="checkbox" name="brands[]" value="{{ brand.brand_hits.hits.hits[0]._source.code }}">
+                                                            {{ brand.brand_hits.hits.hits[0]._source.name }}
+                                                        </label>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                {% elseif type == "options" %}
+                                    {% for option in filter.type.buckets %}
+                                        <div class="ui filter-dropdown compact menu">
+                                            <div class="ui simple dropdown item">
+                                                {{ productOptionNameIndex[option.key] }} <i class="dropdown icon"></i>
+                                                <div class="menu">
+                                                    <button class="btn filter-clear-selected" type="button">Ryd filter</button>
+                                                    <div class="filter-selected">
+                                                        <div class="filter-selected-number"><span>0</span> valgte</div>
+                                                    </div>
+                                                    <div class="filter-select">
+                                                        {% for value in option.value.locale.value_code.buckets %}
+                                                            <label class="filter-select-item">
+                                                                <input type="checkbox" name="options[{{ option.key }}][]" value="{{ value.value_hits.hits.hits[0]._source.code }}">
+                                                                {{ value.value_hits.hits.hits[0]._source.name }}
+                                                            </label>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+
+                                {% elseif type == "attributes" %}
+                                    {% for attribute in filter.type.buckets %}
+                                        <div class="ui filter-dropdown compact menu">
+                                            <div class="ui simple dropdown item">
+                                                {{ productAttributeNameIndex[attribute.key] }} <i class="dropdown icon"></i>
+                                                <div class="menu">
+                                                    <button class="btn filter-clear-selected"  type="button">Ryd filter</button>
+                                                    <div class="filter-selected">
+                                                        <div class="filter-selected-number"><span>0</span> valgte</div>
+                                                    </div>
+                                                    <div class="filter-select">
+                                                        {% for value in attribute.value.locale.values_code.buckets %}
+                                                            <label class="filter-select-item">
+                                                                <input type="checkbox" name="attributes[{{ attribute.key }}][]" value="{{ value.value_hits.hits.hits[0]._source.code }}">
+                                                                {{ value.value_hits.hits.hits[0]._source.name }}
+                                                            </label>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+
+                                {% elseif type == "prices" %}
+                                    <div class="ui filter-dropdown compact menu">
+                                        <div class="ui simple dropdown item">
+                                            {{ 'app.ui.price'|trans }} <i class="dropdown icon"></i>
+                                            <div class="menu">
+                                                <div class="price-slider" data-from="{{ filter.channel.min.value }}" data-to="{{ filter.channel.max.value }}">
+                                                    <div class="amount-range">
+                                                        <div class="from"></div>
+                                                        <div class="to"></div>
+                                                    </div>
+                                                    <div class="flat-slider"></div>
+                                                    <input type="hidden" name="price_from" value="0">
+                                                    <input type="hidden" name="price_to" value="0">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             {% endfor %}
                         </div>
-                    {% else %}
-                        {{ messages.info('sylius.ui.no_results_to_display') }}
-                    {% endif %}
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12">
-                    {{ pagination.simple(paginator, {
-                        'prev_message': '<span class="icon ion-ios-arrow-round-back"></span>',
-                        'next_message': '<span class="icon ion-ios-arrow-round-forward"></span>',
-                        'css_container_class': 'pagination',
-                        'css_item_class': 'page',
-                    }) }}
-                </div>
+                    </div>
+                </form>
+            </section>
+        {% endif %}
+
+        <div class="container">
+            <div id="sorting">
+                {% include '@SetonoSyliusElasticsearchPlugin/_sorting.html.twig' with { 'paginator': results } %}
             </div>
         </div>
-    </section>
+        <div id="results"></div>
+    {% endif %}
+{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript">
+        let resultRequest = null;
+        var getResults = function(url)
+        {
+            if (typeof url === 'undefined') {
+                url = '{{ resultsUrl }}';
+            }
+
+            loadingSpinner.show();
+            if (resultRequest !== null) {
+                resultRequest.abort();
+            }
+
+            resultRequest = $.get(url, $('#filters').serializeArray()).done(function (response) {
+                $('#results').html(response);
+                resultRequest = null;
+                resultRequestTimeout = null;
+                loadingSpinner.hide();
+            });
+        };
+
+        $(document).ready(function () {
+            getResults();
+
+            $('#sorting').on('click', 'a', function(e) {
+                e.preventDefault();
+                $('input[name="sort_field"]').val($(this).data('field'));
+                $('input[name="sort_direction"]').val($(this).data('direction'));
+                getResults();
+                return false;
+            });
+
+            $('#results').on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                getResults($(this).attr('href'));
+                return false;
+            });
+
+            $('.filter-clear-selected').click(function() {
+                $('.filter-select label', $(this).parent()).removeClass('selected');
+                $('.filter-select input[type="checkbox"]', $(this).parent()).prop('checked', false);
+                getResults();
+            });
+
+            $('.filter-dropdown').each(function() {
+                var el = $(this);
+
+                el.on('change', 'input', function()
+                {
+                    $($(this).parent()).toggleClass('selected');
+                    getResults();
+                });
+            });
+
+            $('.price-slider').each(function() {
+                let el = $(this);
+                let from = parseInt(el.data('from'));
+                let to = parseInt(el.data('to'));
+                let differenceRate = (to - from) / 100;
+
+                let setAmountRange = function(from, to) {
+                    $('.amount-range .from', el).html("DKK " + Math.floor(from / 100));
+                    $('.amount-range .to', el).html("DKK " + Math.ceil(to / 100));
+                    $('input[name="price_from"]', el).val(from);
+                    $('input[name="price_to"]', el).val(to);
+                };
+                setAmountRange(from, to);
+
+                $('.flat-slider', el).slider({
+                    orientation: 'horizontal',
+                    range: true,
+                    values: [0, 100],
+                    change: function (event, ui) {
+                        setAmountRange(from + ui.values[0] * differenceRate, to - (100 - ui.values[1]) * differenceRate);
+                        getResults();
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}
