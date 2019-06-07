@@ -142,11 +142,11 @@ class SyncElasticCommand extends ContainerAwareCommand
                                     'boost' => 2,
                                     'fields' => [
                                         'keyword' => [
-                                            'type' => 'keyword'
-                                        ]
-                                    ]
-                                ]
-                            ]
+                                            'type' => 'keyword',
+                                        ],
+                                    ],
+                                ],
+                            ],
                         ],
                         'channels' => [
                             'analyzer' => 'code_analyzer',
@@ -233,7 +233,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                             ],
                         ],
                         'createdAt' => [
-                            'type' => 'date'
+                            'type' => 'date',
                         ],
                     ],
                     'persistence' => [

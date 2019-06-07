@@ -7,16 +7,14 @@ namespace Setono\SyliusElasticsearchPlugin\Controller;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use Pagerfanta\Pagerfanta;
 use Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository;
-use Sylius\Bundle\ProductBundle\Doctrine\ORM\ProductAttributeValueRepository;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 use Sylius\Bundle\TaxonomyBundle\Doctrine\ORM\TaxonRepository;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Core\Model\Taxon;
+use Sylius\Component\Core\Model\TaxonInterface;
 use Sylius\Component\Grid\Provider\ArrayGridProvider;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
-use Sylius\Component\Core\Model\TaxonInterface;
 use Sylius\Component\Product\Model\ProductAttribute;
-use Sylius\Component\Product\Model\ProductAttributeValue;
 use Sylius\Component\Product\Model\ProductOption;
 use Sylius\Component\Product\Repository\ProductOptionRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -148,7 +146,7 @@ class SearchController extends Controller
         $productOptionNameIndex = [];
         foreach ($this->productOptionRepository->findAll() as $productOption) {
             /**
-             * @var $productOption ProductOption
+             * @var ProductOption
              */
             $productOptionNameIndex[$productOption->getCode()] = $productOption->getTranslation()->getName();
         }
@@ -157,7 +155,7 @@ class SearchController extends Controller
         $productAttributeNameIndex = [];
         foreach ($this->productAttributeRepository->findAll() as $productAttribute) {
             /**
-             * @var $productAttribute ProductAttribute
+             * @var ProductAttribute
              */
             $productAttributeNameIndex[$productAttribute->getCode()] = $productAttribute->getName();
         }
@@ -179,7 +177,7 @@ class SearchController extends Controller
         $taxon = $this->taxonRepository->findOneBySlug($slug, $this->localeContext->getLocaleCode());
 
         return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
-            'results' => $this->getResults($request, $taxon)
+            'results' => $this->getResults($request, $taxon),
         ]);
     }
 
@@ -213,15 +211,18 @@ class SearchController extends Controller
         $sortField = $request->get('sort_field');
         $sortDirection = $request->get('sort_direction');
 
-        switch($sortField) {
+        switch ($sortField) {
             case 'createdAt':
                 $this->elasticSearchTaxonRepository->sortByCreated($sortDirection);
+
                 break;
             case 'name':
                 $this->elasticSearchTaxonRepository->sortByProductName($sortDirection, $this->localeContext->getLocaleCode());
+
                 break;
             case 'price':
                 $this->elasticSearchTaxonRepository->sortByPrice($sortDirection, $this->channelContext->getChannel());
+
                 break;
         }
 

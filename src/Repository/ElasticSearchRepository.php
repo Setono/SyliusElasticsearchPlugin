@@ -130,15 +130,17 @@ class ElasticSearchRepository
         return $this;
     }
 
-    public function sortByCreated(string $direction) {
+    public function sortByCreated(string $direction)
+    {
         $this->sort[] = [
             'createdAt' => [
-                'order' => $direction
-            ]
+                'order' => $direction,
+            ],
         ];
     }
 
-    public function sortByProductName(string $direction, string $localeCode) {
+    public function sortByProductName(string $direction, string $localeCode)
+    {
         $this->sort[] = [
             'translations.name.keyword' => [
                 'order' => $direction,
@@ -146,15 +148,16 @@ class ElasticSearchRepository
                     'path' => 'translations',
                     'filter' => [
                         'match' => [
-                            'translations.locale' => $localeCode
-                        ]
-                    ]
-                ]
-            ]
+                            'translations.locale' => $localeCode,
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
-    public function sortByPrice(string $direction, ChannelInterface $channel) {
+    public function sortByPrice(string $direction, ChannelInterface $channel)
+    {
         $this->sort[] = [
             'prices.price' => [
                 'order' => $direction,
@@ -162,11 +165,11 @@ class ElasticSearchRepository
                     'path' => 'prices',
                     'filter' => [
                         'term' => [
-                            'prices.channel' => $channel->getCode()
-                        ]
-                    ]
-                ]
-            ]
+                            'prices.channel' => $channel->getCode(),
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
