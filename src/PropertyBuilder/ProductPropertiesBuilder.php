@@ -11,23 +11,18 @@ use Sylius\Component\Core\Model\ProductInterface;
 /**
  * This class is copied and altered from the BitBagCommerce/SyliusElasticsearchPlugin repo.
  */
-final class ChannelsBuilder extends AbstractBuilder
+final class ProductPropertiesBuilder extends AbstractBuilder
 {
     /**
-     * @param TransformEvent $event
+     * {@inheritdoc}
      */
     public function consumeEvent(TransformEvent $event): void
     {
         $this->buildProperty($event, ProductInterface::class,
             function (ProductInterface $product, Document $document): void {
-                $channels = [];
-
-                foreach ($product->getChannels() as $channel) {
-                    $channels[] = $channel->getCode();
-                }
-
-                $document->setType('default');
-                $document->set('channels', $channels);
+                $document->set('id', $product->getId());
+                $document->set('code', $product->getCode());
+                $document->set('createdAt', $product->getCreatedAt()->format(DATE_ATOM));
             }
         );
     }

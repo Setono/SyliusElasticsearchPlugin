@@ -1,0 +1,35 @@
+{% import '@SyliusUi/Macro/messages.html.twig' as messages %}
+{% import '@SyliusUi/Macro/pagination.html.twig' as pagination %}
+
+<section class="product-index">
+    <div class="container">
+        <div class="counts">
+            {% set resultStart = results.nbResults > 0 ? results.maxPerPage * results.currentPage - results.maxPerPage + 1 : 0 %}
+            {% set resultEnd = min(results.nbResults, results.maxPerPage * results.currentPage) %}
+            {{ 'app.ui.pagination.result'|trans({'%resultStart%': resultStart, '%resultEnd%': resultEnd, '%nbResults%': results.nbResults}) }}
+        </div>
+
+        {% if results|length > 0 %}
+            <div class="row products">
+                {% for product in results %}
+                    <div class="col-lg-3">
+                        {% include '@SyliusShop/Product/_card.html.twig' %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            {{ messages.info('sylius.ui.no_results_to_display') }}
+        {% endif %}
+    </div>
+</section>
+
+{% if results.nbResults > results.maxPerPage %}
+    <div class="container">
+        {{ pagination.simple(results, {
+            'prev_message': 'app.ui.pagination.previous'|trans,
+            'next_message': 'app.ui.pagination.next'|trans,
+            'css_container_class': 'pagination',
+            'css_item_class': 'page',
+        }) }}
+    </div>
+{% endif %}

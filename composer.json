@@ -9,10 +9,17 @@
         "sylius/sylius": "^1.3",
         "friendsofsymfony/elastica-bundle": "^5.1"
     },
+    "require-dev": {
+        "sylius-labs/coding-standard": "^2.0"
+    },
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Setono\\SyliusElasticsearchPlugin\\": "src/"
         }
+    },
+    "scripts": {
+        "check-style": "./vendor/bin/ecs check src/",
+        "fix-style": "./vendor/bin/ecs check --fix src/"
     }
 }

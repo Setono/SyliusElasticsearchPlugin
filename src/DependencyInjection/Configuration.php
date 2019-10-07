@@ -25,17 +25,10 @@ class Configuration implements ConfigurationInterface
                     ->prototype('array')
                         ->addDefaultsIfNotSet()
                         ->children()
-                            ->scalarNode('index_name')->isRequired()->cannotBeEmpty()->end()
                             ->scalarNode('type_name')->isRequired()->cannotBeEmpty()->end()
                             ->scalarNode('model_class')->isRequired()->cannotBeEmpty()->end()
                         ->end()
                     ->end()
-                ->end()
-                ->arrayNode('attributes')
-                    ->scalarPrototype()->end()
-                ->end()
-                ->variableNode('finder_indexes')
-                    ->defaultValue([])
                 ->end()
             ->end();
 

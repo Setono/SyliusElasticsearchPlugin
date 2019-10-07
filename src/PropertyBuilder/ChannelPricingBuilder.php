@@ -28,9 +28,16 @@ final class ChannelPricingBuilder extends AbstractBuilder
                 /** @var ProductVariantInterface $productVariant */
                 $productVariant = $product->getVariants()->first();
 
+                $prices = [];
                 foreach ($productVariant->getChannelPricings() as $channelPricing) {
-                    $document->set('price', $channelPricing->getPrice());
+                    $prices[] = [
+                        'channel' => $channelPricing->getChannelCode(),
+                        'price' => $channelPricing->getPrice(),
+                        'originalPrice' => $channelPricing->getOriginalPrice(),
+                    ];
                 }
+
+                $document->set('prices', $prices);
             });
     }
 }

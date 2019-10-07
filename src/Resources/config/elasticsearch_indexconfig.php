@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 /**
  * ElasticSearch index analysis settings
  */
@@ -7,7 +9,7 @@ $analysis = [
         'dash_and_hyphens' => [
             'type' => 'mapping',
             'mappings' => [
-                '-=>'
+                '-=>',
             ],
         ],
     ],
@@ -28,7 +30,7 @@ $analysis = [
                 'ngram',
                 'lowercase',
                 'asciifolding',
-                'trim'
+                'trim',
             ],
         ],
     ],
@@ -44,7 +46,7 @@ $productTypes = [
                 'type' => 'text',
                 'analyzer' => 'autocomplete',
             ],
-            'shortDescription'  => [
+            'shortDescription' => [
                 'type' => 'text',
                 'analyzer' => 'autocomplete',
             ],
@@ -57,31 +59,31 @@ $productTypes = [
                 'analyzer' => 'autocomplete',
             ],
             'createdAt' => [
-                'type' => 'date'
+                'type' => 'date',
             ],
             'name' => [
                 'type' => 'text',
                 'fields' => [
                     'keyword' => [
-                        'type' => 'keyword'
-                    ]
-                ]
-            ]
+                        'type' => 'keyword',
+                    ],
+                ],
+            ],
         ],
         'persistence' => [
             'driver' => 'orm',
             'model' => '%sylius.model.product.class%',
             'provider' => [
-                'query_builder_method' => 'createEnabledProductQueryBuilder'
+                'query_builder_method' => 'createEnabledProductQueryBuilder',
             ],
             'listener' => [
-                'enabled' => false
+                'enabled' => false,
             ],
             'elastica_to_model_transformer' => [
-                'ignore_missing' => true
-            ]
-        ]
-    ]
+                'ignore_missing' => true,
+            ],
+        ],
+    ],
 ];
 
 /**
@@ -106,8 +108,8 @@ $taxonTypes = [
             'provider' => null,
             'finder' => null,
             'listener' => [
-                'enabled' => false
+                'enabled' => false,
             ],
-        ]
-    ]
+        ],
+    ],
 ];

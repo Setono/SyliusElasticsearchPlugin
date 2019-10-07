@@ -7,9 +7,6 @@ namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-/**
- * This class is copied and altered from the BitBagCommerce/SyliusElasticsearchPlugin repo.
- */
 interface PropertyBuilderInterface extends EventSubscriberInterface
 {
     /**

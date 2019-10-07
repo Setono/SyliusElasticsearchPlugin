@@ -1,57 +1,84 @@
 services:
-    setono_sylius_elasticsearch_plugin.string_formatter:
-        class: Setono\SyliusElasticsearchPlugin\Formatter\StringFormatter
+  setono_sylius_elasticsearch_plugin.repository.elastic_search:
+    class: Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository
 
-    setono_sylius_elasticsearch_plugin.property_builder.product_name:
-        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductNameBuilder
-        arguments:
-            - "@sylius.context.locale"
-        tags:
-            - { name: kernel.event_subscriber }
+  setono_sylius_elasticsearch_plugin.transformer.product_transformer:
+    class: Setono\SyliusElasticsearchPlugin\Transformer\ProductTransformer
+    parent: fos_elastica.model_to_elastica_transformer
 
-    setono_sylius_elasticsearch_plugin.property_builder.option:
-        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\OptionBuilder
-        arguments:
-            - "@setono_sylius_elasticsearch_plugin.string_formatter"
-        tags:
-            - { name: kernel.event_subscriber }
+  Setono\SyliusElasticsearchPlugin\Controller\SearchController:
+    public: true
+    arguments:
+      - "@sylius.repository.taxon"
+      - "@sylius.repository.product_option"
+      - "@sylius.repository.product_attribute"
+      - "@fos_elastica.finder.products.default"
+      - "@fos_elastica.finder.taxons.default"
+      - "@sylius.context.locale"
+      - "@sylius.context.channel"
+      - "@setono_sylius_elasticsearch_plugin.repository.elastic_search"
 
-    setono_sylius_elasticsearch_plugin.property_builder.attribute:
-        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\AttributeBuilder
-        arguments:
-            - "@setono_sylius_elasticsearch_plugin.string_formatter"
-        tags:
-            - { name: kernel.event_subscriber }
+  setono_sylius_elasticsearch_plugin.property_builder.product_properties:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductPropertiesBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
 
-    setono_sylius_elasticsearch_plugin.property_builder.product_taxons:
-        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductTaxonsBuilder
-        arguments:
-            - "@setono_sylius_elasticsearch_plugin.property_builder.mapper.product_taxons"
-        tags:
-            - { name: kernel.event_subscriber }
+  setono_sylius_elasticsearch_plugin.property_builder.product_translations:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductTranslationsBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
 
-    setono_sylius_elasticsearch_plugin.property_builder.channels:
-        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ChannelsBuilder
-        tags:
-            - { name: kernel.event_subscriber }
+  setono_sylius_elasticsearch_plugin.property_builder.option:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\OptionBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
 
-    setono_sylius_elasticsearch_plugin.property_builder.channel_pricing:
-        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ChannelPricingBuilder
-        tags:
-            - { name: kernel.event_subscriber }
+  setono_sylius_elasticsearch_plugin.property_builder.attribute:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\AttributeBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
 
-    setono_sylius_elasticsearch_plugin.property_builder.mapper.product_taxons:
-        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\Mapper\ProductTaxonsMapper
+  setono_sylius_elasticsearch_plugin.property_builder.product_taxons:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductTaxonsBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
 
-    setono_sylius_elasticsearch_plugin.property_builder.loevgaard_brand:
-        class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\LoevgaardBrandBuilder
-        arguments:
-            - "@service_container"
-        tags:
-            - { name: kernel.event_subscriber }
+  setono_sylius_elasticsearch_plugin.property_builder.channels:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ChannelsBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
 
-    setono_sylius_elasticsearch_plugin.command.generate_config:
-        class: Setono\SyliusElasticsearchPlugin\Command\SyncElasticCommand
-        arguments:
-            - "@sylius.repository.channel"
-        tags: [console.command]
+  setono_sylius_elasticsearch_plugin.property_builder.channel_pricing:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ChannelPricingBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
+
+  setono_sylius_elasticsearch_plugin.property_builder.mapper.product_taxons:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\Mapper\ProductTaxonsMapper
+    arguments:
+      - "@sylius.repository.channel"
+
+  setono_sylius_elasticsearch_plugin.property_builder.loevgaard_brand:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\LoevgaardBrandBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
+
+  setono_sylius_elasticsearch_plugin.command.generate_config:
+    class: Setono\SyliusElasticsearchPlugin\Command\SyncElasticCommand
+    tags: [console.command]

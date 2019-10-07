@@ -24,22 +24,20 @@ class SetonoSyliusElasticsearchExtension extends Extension
     {
         $config = $this->processConfiguration(new Configuration(), $configs);
 
-        $container->setParameter('setono_sylius_elasticsearch.config', $config);
+        $container->setParameter('setono_sylius_elasticsearch.index_configs', $config['index_configs']);
 
-        if (!empty($config['index_configs'])) {
-            foreach ($config['index_configs'] as $indexConfigs) {
-                $listenerId = sprintf(
-                    'elastic_search.object_change_listener.%s.%s',
-                    $indexConfigs['index_name'],
-                    $indexConfigs['type_name']
-                );
+        foreach ($config['index_configs'] as $indexName => $indexConfigs) {
+            $listenerId = sprintf(
+                'elastic_search.object_change_listener.%s.%s',
+                $indexName,
+                $indexConfigs['type_name']
+            );
 
-                $container->register($listenerId, ObjectChangeListener::class)
-                    ->setPublic(true)
-                    ->addArgument($indexConfigs)
-                    ->addArgument('@fos_elastica.persister_registry')
-                    ->addArgument('@fos_elastica.indexable');
-            }
+            $container->register($listenerId, ObjectChangeListener::class)
+                ->setPublic(true)
+                ->addArgument($indexConfigs)
+                ->addArgument('@fos_elastica.persister_registry')
+                ->addArgument('@fos_elastica.indexable');
         }
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
