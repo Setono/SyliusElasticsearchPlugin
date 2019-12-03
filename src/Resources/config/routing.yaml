@@ -8,6 +8,11 @@ search_list:
   defaults: {queryString: ''}
   controller: Setono\SyliusElasticsearchPlugin\Controller\SearchController::searchListAction
 
+search_list_results:
+  path: /search/{queryString}/results
+  defaults: {queryString: ''}
+  controller: Setono\SyliusElasticsearchPlugin\Controller\SearchController::searchListResultsAction
+
 sylius_shop_product_results:
   path: /taxons/{slug}/results
   methods: [GET]

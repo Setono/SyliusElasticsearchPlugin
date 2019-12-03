@@ -100,7 +100,18 @@ class SearchController extends Controller
     {
         return $this->render('@SetonoSyliusElasticsearchPlugin/index.html.twig', [
             'query' => $queryString,
-            'paginator' => $this->search($request, $queryString),
+            'resultsUrl' => $request->getPathInfo() . '/results',
+            'results' => $this->search($request, $queryString),
+        ]);
+    }
+
+    /**
+     * Search results page
+     */
+    public function searchListResultsAction(Request $request, string $queryString): Response
+    {
+        return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
+            'results' => $this->search($request, $queryString),
         ]);
     }
 
@@ -206,13 +217,16 @@ class SearchController extends Controller
     /**
      * Perform a product search using the index defined for the active locale.
      */
-    private function search(Request $request, string $queryString = '', string $taxonCode = ''): Pagerfanta
+    private function search(Request $request, string $queryString = ''): Pagerfanta
     {
         /** @var ArrayGridProvider $gridProvider */
         $gridProvider = $this->get('sylius.grid.provider');
         $grid = $gridProvider->get('sylius_shop_product');
 
-        $paginator = $this->productFinder->findPaginated('*' . $queryString . '*');
+        $translationsNested = new Nested();
+        $translationsNested->setPath('translations');
+        $translationsNested->setQuery(new QueryString('*' . $queryString . '*'));
+        $paginator = $this->productFinder->findPaginated(new Query($translationsNested));
         $paginator->setMaxPerPage($request->get('limit', $grid->getLimits()[0]));
         $paginator->setCurrentPage($request->get('page', 1));
 
