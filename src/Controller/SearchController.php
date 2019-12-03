@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\Controller;
 
+use Elastica\Query;
+use Elastica\Query\Nested;
+use Elastica\Query\QueryString;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use Pagerfanta\Pagerfanta;
 use Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository;
@@ -23,44 +26,28 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SearchController extends Controller
 {
-    /**
-     * @var TaxonRepository
-     */
+    /** @var TaxonRepository */
     private $taxonRepository;
 
-    /**
-     * @var ProductOptionRepositoryInterface
-     */
+    /** @var ProductOptionRepositoryInterface */
     private $productOptionRepository;
 
-    /**
-     * @var EntityRepository
-     */
+    /** @var EntityRepository */
     private $productAttributeRepository;
 
-    /**
-     * @var PaginatedFinderInterface
-     */
+    /** @var PaginatedFinderInterface */
     private $productFinder;
 
-    /**
-     * @var PaginatedFinderInterface
-     */
+    /** @var PaginatedFinderInterface */
     private $taxonFinder;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $localeContext;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $channelContext;
 
-    /**
-     * @var ElasticSearchRepository
-     */
+    /** @var ElasticSearchRepository */
     private $elasticSearchTaxonRepository;
 
     public function __construct(TaxonRepository $taxonRepository,
@@ -84,18 +71,16 @@ class SearchController extends Controller
 
     /**
      * Get rendered result for the search box
-     *
-     * @param Request $request
-     * @param string  $queryString
-     *
-     * @return Response
      */
     public function searchAjaxAction(Request $request, string $queryString): Response
     {
         $products = $taxons = [];
         if (!empty($queryString)) {
             $productLimit = $request->get('plimit', 10);
-            $products = $this->productFinder->find('*' . $queryString . '*', $productLimit);
+            $translationsNested = new Nested();
+            $translationsNested->setPath('translations');
+            $translationsNested->setQuery(new QueryString('*' . $queryString . '*'));
+            $products = $this->productFinder->find(new Query($translationsNested), $productLimit);
 
             $taxonLimit = $request->get('tlimit', 5);
             $taxons = $this->taxonFinder->find('*' . $queryString . '*', $taxonLimit);
@@ -110,26 +95,26 @@ class SearchController extends Controller
 
     /**
      * Search page
-     *
-     * @param Request $request
-     * @param string  $queryString
-     *
-     * @return Response
      */
     public function searchListAction(Request $request, string $queryString): Response
     {
         return $this->render('@SetonoSyliusElasticsearchPlugin/index.html.twig', [
             'query' => $queryString,
-            'paginator' => $this->search($request, $queryString),
+            'resultsUrl' => $request->getPathInfo() . '/results',
+            'results' => $this->search($request, $queryString),
         ]);
     }
 
     /**
-     * @param Request $request
-     * @param string  $slug
-     *
-     * @return Response
+     * Search results page
      */
+    public function searchListResultsAction(Request $request, string $queryString): Response
+    {
+        return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
+            'results' => $this->search($request, $queryString),
+        ]);
+    }
+
     public function searchTaxonAction(Request $request, string $slug): Response
     {
         /** @var Taxon $taxon */
@@ -231,20 +216,17 @@ class SearchController extends Controller
 
     /**
      * Perform a product search using the index defined for the active locale.
-     *
-     * @param Request $request
-     * @param string  $queryString
-     * @param string  $taxonCode
-     *
-     * @return Pagerfanta
      */
-    private function search(Request $request, string $queryString = '', string $taxonCode = ''): Pagerfanta
+    private function search(Request $request, string $queryString = ''): Pagerfanta
     {
         /** @var ArrayGridProvider $gridProvider */
         $gridProvider = $this->get('sylius.grid.provider');
         $grid = $gridProvider->get('sylius_shop_product');
 
-        $paginator = $this->productFinder->findPaginated('*' . $queryString . '*');
+        $translationsNested = new Nested();
+        $translationsNested->setPath('translations');
+        $translationsNested->setQuery(new QueryString('*' . $queryString . '*'));
+        $paginator = $this->productFinder->findPaginated(new Query($translationsNested));
         $paginator->setMaxPerPage($request->get('limit', $grid->getLimits()[0]));
         $paginator->setCurrentPage($request->get('page', 1));
 
