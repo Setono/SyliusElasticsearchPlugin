@@ -10,9 +10,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
-/**
- * @author jdk
- */
 class SetonoSyliusElasticsearchExtension extends Extension
 {
     /**
@@ -25,6 +22,7 @@ class SetonoSyliusElasticsearchExtension extends Extension
         $config = $this->processConfiguration(new Configuration(), $configs);
 
         $container->setParameter('setono_sylius_elasticsearch.index_configs', $config['index_configs']);
+        $container->setParameter('setono_sylius_elasticsearch.pagination', $config['pagination']);
 
         foreach ($config['index_configs'] as $indexName => $indexConfigs) {
             $listenerId = sprintf(

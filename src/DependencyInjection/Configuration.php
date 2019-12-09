@@ -7,9 +7,6 @@ namespace Setono\SyliusElasticsearchPlugin\DependencyInjection;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
-/**
- * @author jdk
- */
 class Configuration implements ConfigurationInterface
 {
     /**
@@ -25,10 +22,21 @@ class Configuration implements ConfigurationInterface
                     ->prototype('array')
                         ->addDefaultsIfNotSet()
                         ->children()
-                            ->scalarNode('type_name')->isRequired()->cannotBeEmpty()->end()
-                            ->scalarNode('model_class')->isRequired()->cannotBeEmpty()->end()
+                            ->scalarNode('type_name')
+                                ->isRequired()
+                                ->cannotBeEmpty()
+                            ->end()
+                            ->scalarNode('model_class')
+                                ->isRequired()
+                                ->cannotBeEmpty()
+                            ->end()
                         ->end()
                     ->end()
+                ->end()
+                ->scalarNode('pagination')
+                    ->isRequired()
+                    ->defaultValue(16)
+                    ->cannotBeEmpty()
                 ->end()
             ->end();
 
