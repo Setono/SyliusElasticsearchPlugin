@@ -50,6 +50,9 @@ class SearchController extends Controller
     /** @var ElasticSearchRepository */
     private $elasticSearchTaxonRepository;
 
+    /** @var int */
+    private $pagination;
+
     public function __construct(TaxonRepository $taxonRepository,
                                 ProductOptionRepositoryInterface $productOptionRepository,
                                 EntityRepository $productAttributeRepository,
@@ -57,7 +60,8 @@ class SearchController extends Controller
                                 PaginatedFinderInterface $taxonFinder,
                                 LocaleContextInterface $localeContext,
                                 ChannelContextInterface $channelContext,
-                                ElasticSearchRepository $elasticSearchTaxonRepository
+                                ElasticSearchRepository $elasticSearchTaxonRepository,
+                                int $pagination
     ) {
         $this->taxonRepository = $taxonRepository;
         $this->productOptionRepository = $productOptionRepository;
@@ -67,6 +71,7 @@ class SearchController extends Controller
         $this->localeContext = $localeContext;
         $this->channelContext = $channelContext;
         $this->elasticSearchTaxonRepository = $elasticSearchTaxonRepository;
+        $this->pagination = $pagination;
     }
 
     /**
@@ -121,7 +126,7 @@ class SearchController extends Controller
         $taxon = $this->taxonRepository->findOneBySlug($slug, $this->localeContext->getLocaleCode());
 
         $filtersPaginator = $this->productFinder->findPaginated($this->elasticSearchTaxonRepository->getAvailableFilters($this->channelContext->getChannel(), $this->localeContext->getLocaleCode(), $taxon));
-        $filtersPaginator->setMaxPerPage(20);
+        $filtersPaginator->setMaxPerPage($this->pagination);
         $filters = $this->getFilterTranslations($filtersPaginator->getAdapter()->getAggregations());
 
         $results = $this->getResults($request, $taxon);
@@ -227,7 +232,7 @@ class SearchController extends Controller
         $translationsNested->setPath('translations');
         $translationsNested->setQuery(new QueryString('*' . $queryString . '*'));
         $paginator = $this->productFinder->findPaginated(new Query($translationsNested));
-        $paginator->setMaxPerPage($request->get('limit', $grid->getLimits()[0]));
+        $paginator->setMaxPerPage($request->get('limit', $this->pagination));
         $paginator->setCurrentPage($request->get('page', 1));
 
         return $paginator;
@@ -239,7 +244,7 @@ class SearchController extends Controller
         $grid = $gridProvider->get('sylius_shop_product');
 
         $paginator = $this->productFinder->findPaginated($query);
-        $paginator->setMaxPerPage($request->get('limit', $grid->getLimits()[0]));
+        $paginator->setMaxPerPage($request->get('limit', $this->pagination));
         $paginator->setCurrentPage($request->get('page', 1));
 
         return $paginator;
