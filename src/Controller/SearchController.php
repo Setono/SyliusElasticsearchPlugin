@@ -84,8 +84,20 @@ class SearchController extends Controller
             $productLimit = $request->get('plimit', 10);
             $translationsNested = new Nested();
             $translationsNested->setPath('translations');
-            $translationsNested->setQuery(new QueryString('*' . $queryString . '*'));
-            $products = $this->productFinder->find(new Query($translationsNested), $productLimit);
+            $queryStringObject = new QueryString($queryString . '~');
+            $queryStringObject->setParam('fuzziness', '10');
+
+            $translationsNested->setQuery($queryStringObject);
+
+            $queryObject = new Query($translationsNested);
+            $queryObject->setSort(
+                [
+                    '_score' => [
+                        'order' => 'desc'
+                    ]
+                ]
+            );
+            $products = $this->productFinder->find($queryObject, $productLimit);
 
             $taxonLimit = $request->get('tlimit', 5);
             $taxons = $this->taxonFinder->find('*' . $queryString . '*', $taxonLimit);
@@ -230,8 +242,20 @@ class SearchController extends Controller
 
         $translationsNested = new Nested();
         $translationsNested->setPath('translations');
-        $translationsNested->setQuery(new QueryString('*' . $queryString . '*'));
-        $paginator = $this->productFinder->findPaginated(new Query($translationsNested));
+        $queryStringObject = new QueryString($queryString . '~');
+        $queryStringObject->setParam('fuzziness', '10');
+
+        $translationsNested->setQuery($queryStringObject);
+
+        $queryObject = new Query($translationsNested);
+        $queryObject->setSort(
+            [
+                '_score' => [
+                    'order' => 'desc'
+                ]
+            ]
+        );
+        $paginator = $this->productFinder->findPaginated($queryObject);
         $paginator->setMaxPerPage($request->get('limit', $this->pagination));
         $paginator->setCurrentPage($request->get('page', 1));
 
