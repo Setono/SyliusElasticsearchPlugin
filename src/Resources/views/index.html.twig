@@ -13,23 +13,26 @@
 
                     <div class="container">
                         <div class="filters">
+                            <button class="filter-mobile-toggle">{{ 'app.filter.apply_product_filter'|trans }}<span>X</span></button>
+                            <h5 class="fitler-mobile-title">{{ 'app.filter.filter'|trans }}</h5>
                             {% for type, filter in filters %}
                                 {% if type == "brands" %}
                                     <div class="ui filter-dropdown compact menu">
                                         <div class="ui simple dropdown item">
-                                            {{ 'app.ui.brand'|trans }} <i class="dropdown icon"></i>
+                                            {{ 'app.ui.brand'|trans }} <span class="counter"></span><i class="dropdown icon"></i>
                                             <div class="menu">
-                                                <button class="btn filter-clear-selected" type="button">Ryd filter</button>
-                                                <div class="filter-selected">
-                                                    <div class="filter-selected-number"><span>0</span> valgte</div>
-                                                </div>
                                                 <div class="filter-select">
                                                     {% for brand in filter.code.buckets %}
-                                                        <label class="filter-select-item">
-                                                            <input type="checkbox" name="brands[]" value="{{ brand.brand_hits.hits.hits[0]._source.code }}">
+                                                        {% set selected = request.get('brands') != null and brand.brand_hits.hits.hits[0]._source.code in request.get('brands') %}
+                                                        <label class="filter-select-item {{ selected ? 'selected' : '' }}">
+                                                            <input type="checkbox" name="brands[]" value="{{ brand.brand_hits.hits.hits[0]._source.code }}" {{ selected ? 'checked="checked"' : '' }}">
+                                                            <span class="checkbox"></span>
                                                             {{ brand.brand_hits.hits.hits[0]._source.name }}
                                                         </label>
                                                     {% endfor %}
+                                                </div>
+                                                <div class="filter-clear-selected" style="display: none;">
+                                                    <button class="btn" type="button"><i></i> {{'app.filter.clear_filter'|trans}} <span class="counter"></span></button>
                                                 </div>
                                             </div>
                                         </div>
@@ -39,19 +42,20 @@
                                     {% for option in filter.type.buckets %}
                                         <div class="ui filter-dropdown compact menu">
                                             <div class="ui simple dropdown item">
-                                                {{ productOptionNameIndex[option.key] }} <i class="dropdown icon"></i>
+                                                {{ productOptionNameIndex[option.key] }} <span class="counter"></span><i class="dropdown icon"></i>
                                                 <div class="menu">
-                                                    <button class="btn filter-clear-selected" type="button">Ryd filter</button>
-                                                    <div class="filter-selected">
-                                                        <div class="filter-selected-number"><span>0</span> valgte</div>
-                                                    </div>
                                                     <div class="filter-select">
                                                         {% for value in option.value.locale.value_code.buckets %}
-                                                            <label class="filter-select-item">
-                                                                <input type="checkbox" name="options[{{ option.key }}][]" value="{{ value.value_hits.hits.hits[0]._source.code }}">
+                                                            {% set selected = request.get('options') != null and request.get('options')[option.key] is defined and value.value_hits.hits.hits[0]._source.code in request.get('options')[option.key] %}
+                                                            <label class="filter-select-item {{ selected ? 'selected' : '' }}">
+                                                                <input type="checkbox" name="options[{{ option.key }}][]" value="{{ value.value_hits.hits.hits[0]._source.code }}" {{ selected ? 'checked="checked"' : '' }}">
+                                                                <span class="checkbox"></span>
                                                                 {{ value.value_hits.hits.hits[0]._source.name }}
                                                             </label>
                                                         {% endfor %}
+                                                    </div>
+                                                    <div class="filter-clear-selected" style="display: none;">
+                                                        <button class="btn" type="button"><i></i> {{'app.filter.clear_filter'|trans}} <span class="counter"></span></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -62,19 +66,20 @@
                                     {% for attribute in filter.type.buckets %}
                                         <div class="ui filter-dropdown compact menu">
                                             <div class="ui simple dropdown item">
-                                                {{ productAttributeNameIndex[attribute.key] }} <i class="dropdown icon"></i>
+                                                {{ productAttributeNameIndex[attribute.key] }} <span class="counter"></span><i class="dropdown icon"></i>
                                                 <div class="menu">
-                                                    <button class="btn filter-clear-selected"  type="button">Ryd filter</button>
-                                                    <div class="filter-selected">
-                                                        <div class="filter-selected-number"><span>0</span> valgte</div>
-                                                    </div>
                                                     <div class="filter-select">
                                                         {% for value in attribute.value.locale.values_code.buckets %}
-                                                            <label class="filter-select-item">
-                                                                <input type="checkbox" name="attributes[{{ attribute.key }}][]" value="{{ value.value_hits.hits.hits[0]._source.code }}">
+                                                            {% set selected = request.get('attributes') != null and request.get('attributes')[attribute.key] is defined and value.value_hits.hits.hits[0]._source.code in request.get('attributes')[attribute.key] %}
+                                                            <label class="filter-select-item {{ selected ? 'selected' : '' }}">
+                                                                <input type="checkbox" name="attributes[{{ attribute.key }}][]" value="{{ value.value_hits.hits.hits[0]._source.code }}" {{ selected ? 'checked="checked"' : '' }}">
+                                                                <span class="checkbox"></span>
                                                                 {{ value.value_hits.hits.hits[0]._source.name }}
                                                             </label>
                                                         {% endfor %}
+                                                    </div>
+                                                    <div class="filter-clear-selected" style="display: none;">
+                                                        <button class="btn"  type="button"><i></i> {{'app.filter.clear_filter'|trans}} <span class="counter"></span></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -84,9 +89,13 @@
                                 {% elseif type == "prices" %}
                                     <div class="ui filter-dropdown compact menu">
                                         <div class="ui simple dropdown item">
-                                            {{ 'app.ui.price'|trans }} <i class="dropdown icon"></i>
+                                            {{ 'app.ui.price'|trans }} <span class="range"></span> <i class="dropdown icon"></i>
                                             <div class="menu">
-                                                <div class="price-slider" data-from="{{ filter.channel.min.value }}" data-to="{{ filter.channel.max.value }}">
+                                                <div class="price-slider"
+                                                     data-min="{{ filter.channel.min.value }}"
+                                                     data-max="{{ filter.channel.max.value }}"
+                                                     data-from="{{ request.get('price_from') != null ? request.get('price_from') : filter.channel.min.value }}"
+                                                     data-to="{{ request.get('price_to') != null ? request.get('price_to') : filter.channel.max.value }}">
                                                     <div class="amount-range">
                                                         <div class="from"></div>
                                                         <div class="to"></div>
@@ -100,18 +109,20 @@
                                     </div>
                                 {% endif %}
                             {% endfor %}
+                            <button class="fitler-mobile-apply">{{ 'app.filter.apply_filter'|trans }}</button>
                         </div>
                     </div>
                 </form>
             </section>
         {% endif %}
 
-        <div class="container">
+        <div class="taxon-results container">
             <div id="sorting">
                 {% include '@SetonoSyliusElasticsearchPlugin/_sorting.html.twig' with { 'paginator': results } %}
             </div>
+            <div id="results">{% include '@SetonoSyliusElasticsearchPlugin/results.html.twig' with { 'results': results } %} }}</div>
+            <div class="taxon-description-mobile">{{ taxon.description|raw }}</div>
         </div>
-        <div id="results"></div>
     {% endif %}
 {% endblock %}
 
@@ -119,7 +130,15 @@
     {{ parent() }}
     <script type="text/javascript">
         let resultRequest = null;
-        var getResults = function(url)
+
+        let loadImages = function(){
+            $('.main-image[data-hover-image]').each(function() {
+                const url = $(this).data('hover-image');
+                $.get(url);
+            });
+        };
+
+        let getResults = function(url)
         {
             if (typeof url === 'undefined') {
                 url = '{{ resultsUrl }}';
@@ -132,15 +151,31 @@
 
             resultRequest = $.get(url, $('#filters').serializeArray()).done(function (response) {
                 $('#results').html(response);
+                loadImages();
                 resultRequest = null;
                 resultRequestTimeout = null;
                 loadingSpinner.hide();
             });
         };
 
-        $(document).ready(function () {
-            getResults();
+        let updateFilter = function(filterElement)
+        {
+            let parent = filterElement.closest('.filter-dropdown');
+            let selectedFilters = $('input[type="checkbox"]:checked', parent);
+            let numFilters = selectedFilters.length;
+            $('span.counter', parent).html(numFilters > 0 ? '(' + numFilters + ')' : ''); // Only show selected counter if greater than 0
+            if (numFilters > 0) {
+                $('.filter-clear-selected', parent).show();
+            } else {
+                $('.filter-clear-selected', parent).hide();
+            }
 
+            $('input[type="checkbox"]', parent).each(function() {
+                $($(this).parent()).toggleClass('selected', $(this).prop('checked'));
+            });
+        };
+
+        $(document).ready(function () {
             $('#sorting').on('click', 'a', function(e) {
                 e.preventDefault();
                 $('input[name="sort_field"]').val($(this).data('field'));
@@ -152,45 +187,65 @@
             $('#results').on('click', '.pagination a', function(e) {
                 e.preventDefault();
                 getResults($(this).attr('href'));
+
+                // Calculate the height of the top-bar, main navigation and the filters
+                let topHeight = $('header .top-bar').outerHeight() + $('nav.main-navigation').outerHeight() + $('section.taxon-filters').outerHeight();
+
+                // Scroll to the top of the results container
+                $('html, body').animate({
+                    scrollTop: $("#results").offset().top - topHeight - 20 // 20 is for padding
+                }, 500);
+
                 return false;
             });
 
-            $('.filter-clear-selected').click(function() {
-                $('.filter-select label', $(this).parent()).removeClass('selected');
-                $('.filter-select input[type="checkbox"]', $(this).parent()).prop('checked', false);
+            $('.filter-clear-selected button').click(function() {
+                let parent = $(this).closest('.menu');
+                $('.filter-select label', parent).removeClass('selected');
+                $('.filter-select input[type="checkbox"]', parent).prop('checked', false);
                 getResults();
+                updateFilter(parent);
             });
 
             $('.filter-dropdown').each(function() {
-                var el = $(this);
+                let el = $(this);
+                updateFilter(el);
 
                 el.on('change', 'input', function()
                 {
-                    $($(this).parent()).toggleClass('selected');
                     getResults();
+                    updateFilter(el);
                 });
             });
 
             $('.price-slider').each(function() {
                 let el = $(this);
-                let from = parseInt(el.data('from'));
-                let to = parseInt(el.data('to'));
-                let differenceRate = (to - from) / 100;
+                let min = parseInt(el.data('min'));
+                let max = parseInt(el.data('max'));
+                let differenceRate = (max - min) / 100;
+                let initFrom = el.data('from');
+                let initTo = el.data('to');
 
                 let setAmountRange = function(from, to) {
-                    $('.amount-range .from', el).html("DKK " + Math.floor(from / 100));
-                    $('.amount-range .to', el).html("DKK " + Math.ceil(to / 100));
+                    let f = Math.floor(from / 100);
+                    let t = Math.ceil(to / 100);
+                    $('.amount-range .from', el).html("DKK " + f);
+                    $('.amount-range .to', el).html("DKK " + t);
                     $('input[name="price_from"]', el).val(from);
                     $('input[name="price_to"]', el).val(to);
+                    $('span.range', el.closest('.filter-dropdown')).html('(' + t + ' - ' + f + ' DKK)');
                 };
-                setAmountRange(from, to);
+                setAmountRange(initFrom, initTo);
 
                 $('.flat-slider', el).slider({
                     orientation: 'horizontal',
                     range: true,
-                    values: [0, 100],
+                    values: [
+                        Math.floor((initFrom - min) / 100) * 100 / differenceRate,
+                        Math.ceil((initTo - min) / 100) * 100 / differenceRate
+                    ],
                     change: function (event, ui) {
-                        setAmountRange(from + ui.values[0] * differenceRate, to - (100 - ui.values[1]) * differenceRate);
+                        setAmountRange(min + ui.values[0] * differenceRate, max - (100 - ui.values[1]) * differenceRate);
                         getResults();
                     }
                 });
