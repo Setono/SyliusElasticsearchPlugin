@@ -137,12 +137,18 @@ class SearchController extends Controller
         /** @var Taxon $taxon */
         $taxon = $this->taxonRepository->findOneBySlug($slug, $this->localeContext->getLocaleCode());
 
+        if($request->isXmlHttpRequest()) {
+            return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
+                'results' => $this->getResults($request, $taxon),
+            ]);
+        }
+
         $filtersPaginator = $this->productFinder->findPaginated($this->elasticSearchTaxonRepository->getAvailableFilters($this->channelContext->getChannel(), $this->localeContext->getLocaleCode(), $taxon));
         $filtersPaginator->setMaxPerPage($this->pagination);
         $filters = $this->getFilterTranslations($filtersPaginator->getAdapter()->getAggregations());
 
         $results = $this->getResults($request, $taxon);
-        $resultsUrl = $request->getPathInfo() . '/results';
+        $resultsUrl = $request->getPathInfo();
 
         // Make product option name index
         $productOptionNameIndex = [];
@@ -170,6 +176,7 @@ class SearchController extends Controller
             'taxon' => $taxon,
             'productOptionNameIndex' => $productOptionNameIndex,
             'productAttributeNameIndex' => $productAttributeNameIndex,
+            'request' => $request,
         ]);
     }
 
