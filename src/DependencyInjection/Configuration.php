@@ -9,14 +9,12 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('setono_sylius_elasticsearch');
         $rootNode
+            ->addDefaultsIfNotSet()
             ->children()
                 ->arrayNode('index_configs')
                     ->prototype('array')
