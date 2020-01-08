@@ -23,6 +23,7 @@ class SetonoSyliusElasticsearchExtension extends Extension
 
         $container->setParameter('setono_sylius_elasticsearch.index_configs', $config['index_configs']);
         $container->setParameter('setono_sylius_elasticsearch.pagination', $config['pagination']);
+        $container->setParameter('setono_sylius_elasticsearch.max_filter_options', $config['max_filter_options']);
 
         foreach ($config['index_configs'] as $indexName => $indexConfigs) {
             $listenerId = sprintf(
