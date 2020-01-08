@@ -38,6 +38,11 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue(16)
                     ->cannotBeEmpty()
                 ->end()
+                ->scalarNode('max_filter_options')
+                    ->isRequired()
+                    ->defaultValue(100)
+                    ->cannotBeEmpty()
+                ->end()
             ->end();
 
         return $treeBuilder;

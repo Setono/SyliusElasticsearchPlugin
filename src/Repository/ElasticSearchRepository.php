@@ -28,9 +28,13 @@ class ElasticSearchRepository
     /** @var array */
     private $sort = [];
 
-    public function __construct()
+    private $maxFilterOptions;
+
+    public function __construct(int $maxFilterOptions)
     {
         $this->resetQuery();
+
+        $this->maxFilterOptions = $maxFilterOptions;
     }
 
     public function whereChannel(ChannelInterface $channel)
@@ -184,6 +188,7 @@ class ElasticSearchRepository
         $brandHitsAggregations->setSource(['includes' => ['brand.name', 'brand.code']]);
         $brandCodeAggregations = new AggregationTerms('code');
         $brandCodeAggregations->setField('brand.code');
+        $brandCodeAggregations->setSize($this->maxFilterOptions);
         $brandCodeAggregations->addAggregation($brandHitsAggregations);
         $brandAggregations = new AggregationNested('brands', 'brand');
         $brandAggregations->addAggregation($brandCodeAggregations);
@@ -205,6 +210,7 @@ class ElasticSearchRepository
         $optionsValueHitsAggregation->setSource(['includes' => ['options.value.name', 'options.value.code']]);
         $optionsValueCodeAggregation = new AggregationTerms('value_code');
         $optionsValueCodeAggregation->setField('options.value.code');
+        $optionsValueCodeAggregation->setSize($this->maxFilterOptions);
         $optionsValueCodeAggregation->addAggregation($optionsValueHitsAggregation);
         $optionsValueLocaleAggregation = new AggregationFilter('locale', new Match('options.value.locale', $localeCode));
         $optionsValueLocaleAggregation->addAggregation($optionsValueCodeAggregation);
@@ -222,6 +228,7 @@ class ElasticSearchRepository
         $attributesValueHitsAggregation->setSource(['includes' => ['attributes.values.name', 'attributes.values.code']]);
         $attributesValueCodeAggregation = new AggregationTerms('values_code');
         $attributesValueCodeAggregation->setField('attributes.values.code');
+        $attributesValueCodeAggregation->setSize($this->maxFilterOptions);
         $attributesValueCodeAggregation->addAggregation($attributesValueHitsAggregation);
         $attributesValueLocaleAggregation = new AggregationFilter('locale', new Match('attributes.values.locale', $localeCode));
         $attributesValueLocaleAggregation->addAggregation($attributesValueCodeAggregation);

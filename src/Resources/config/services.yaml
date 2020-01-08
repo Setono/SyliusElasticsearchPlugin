@@ -1,6 +1,8 @@
 services:
   setono_sylius_elasticsearch_plugin.repository.elastic_search:
     class: Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository
+    arguments:
+      - "%setono_sylius_elasticsearch.max_filter_options%"
 
   setono_sylius_elasticsearch_plugin.transformer.product_transformer:
     class: Setono\SyliusElasticsearchPlugin\Transformer\ProductTransformer
