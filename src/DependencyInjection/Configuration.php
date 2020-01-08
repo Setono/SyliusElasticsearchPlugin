@@ -31,13 +31,13 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                ->scalarNode('pagination')
+                ->integerNode('pagination')
+                    ->min(1)
                     ->defaultValue(16)
-                    ->cannotBeEmpty()
                 ->end()
                 ->integerNode('max_filter_options')
+                    ->min(1)
                     ->defaultValue(100)
-                    ->cannotBeEmpty()
                 ->end()
             ->end();
 
