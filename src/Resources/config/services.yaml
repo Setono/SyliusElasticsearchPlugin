@@ -85,3 +85,18 @@ services:
   setono_sylius_elasticsearch_plugin.command.generate_config:
     class: Setono\SyliusElasticsearchPlugin\Command\SyncElasticCommand
     tags: [console.command]
+
+  setono_sylius_elasticsearch_plugin.listener.product_variant_listener:
+    class: Setono\SyliusElasticsearchPlugin\EventListener\ProductVariantListener
+    arguments:
+      - "@fos_elastica.object_persister.products.default"
+    tags:
+      - name: 'doctrine.orm.entity_listener'
+        event: 'postUpdate'
+        entity: 'Sylius\Component\Core\Model\ProductVariant'
+
+  setono_sylius_elasticsearch_plugin.provider.indexable:
+    class: 'Setono\SyliusElasticsearchPlugin\Provider\Indexable'
+    decorates: 'fos_elastica.indexable'
+    arguments:
+      - []
