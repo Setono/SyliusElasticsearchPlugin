@@ -20,20 +20,14 @@ class ProductVariantListener
 
     public function postUpdate(ProductVariantInterface $variant)
     {
-        $onHand = 0;
-
         $product = $variant->getProduct();
         foreach($product->getVariants() as $child) {
             /** @var ProductVariantInterface $child */
-            $onHand += $child->getOnHand();
+            if ($child->getOnHand() > 0) {
+                $this->persister->replaceOne($product);
+            }
         }
 
-        // As there is no way to test if the product is already exist in the ES index
-        // we will remove the product from the index and add it again if onHand is greater than 0
         $this->persister->deleteOne($product);
-
-        if ($onHand > 0) {
-            $this->persister->insertOne($product);
-        }
     }
 }
