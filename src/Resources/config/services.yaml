@@ -90,6 +90,7 @@ services:
     class: Setono\SyliusElasticsearchPlugin\EventListener\ProductVariantListener
     arguments:
       - "@fos_elastica.object_persister.products.default"
+      - "%setono_sylius_elasticsearch.enable_product_variant_listener%"
     tags:
       - name: 'doctrine.orm.entity_listener'
         event: 'postUpdate'

@@ -39,6 +39,9 @@ class Configuration implements ConfigurationInterface
                     ->min(1)
                     ->defaultValue(100)
                 ->end()
+                ->booleanNode('enable_product_variant_listener')
+                    ->defaultValue(true)
+                ->end()
             ->end();
 
         return $treeBuilder;
