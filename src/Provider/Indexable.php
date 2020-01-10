@@ -23,7 +23,6 @@ final class Indexable extends FOSIndexable
         // indexable if any of the variants has a greater on-hand amount than 0
         if ($object instanceof ProductInterface) {
             /** @var ProductInterface $object */
-            $onHand = 0;
             foreach ($object->getVariants() as $productVariant) {
                 /** @var ProductVariantInterface $productVariant */
                 if ($productVariant->getOnHand() > 0) {
