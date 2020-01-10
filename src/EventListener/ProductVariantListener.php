@@ -25,6 +25,7 @@ class ProductVariantListener
             /** @var ProductVariantInterface $child */
             if ($child->getOnHand() > 0) {
                 $this->persister->replaceOne($product);
+                return;
             }
         }
 
