@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\EventListener;
 
-use FOS\ElasticaBundle\Persister\ObjectPersister;
-use Sylius\Component\Core\Model\ProductVariant;
+use FOS\ElasticaBundle\Persister\ObjectPersisterInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 
 class ProductVariantListener
 {
-    /** @var ObjectPersister */
+    /** @var ObjectPersisterInterface */
     private $persister;
 
-    public function __construct(ObjectPersister $persister)
+    public function __construct(ObjectPersisterInterface $persister)
     {
         $this->persister = $persister;
     }
 
-    public function postUpdate(ProductVariant $variant)
+    public function postUpdate(ProductVariantInterface $variant)
     {
         $onHand = 0;
 
         $product = $variant->getProduct();
         foreach($product->getVariants() as $child) {
-            /** @var ProductVariant $child */
+            /** @var ProductVariantInterface $child */
             $onHand += $child->getOnHand();
         }
 
