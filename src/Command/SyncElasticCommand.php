@@ -243,7 +243,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                             'query_builder_method' => 'createEnabledProductQueryBuilder',
                         ],
                         'listener' => [
-                            'enabled' => false,
+                            'enabled' => true,
                         ],
                         'elastica_to_model_transformer' => [
                             'ignore_missing' => true,
