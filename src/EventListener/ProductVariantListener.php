@@ -13,13 +13,21 @@ class ProductVariantListener
     /** @var ObjectPersisterInterface */
     private $persister;
 
-    public function __construct(ObjectPersisterInterface $persister)
+    /** @var bool */
+    private $enabled;
+
+    public function __construct(ObjectPersisterInterface $persister, bool $enabled)
     {
         $this->persister = $persister;
+        $this->enabled = $enabled;
     }
 
     public function postUpdate(ProductVariantInterface $variant)
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $product = $variant->getProduct();
         foreach($product->getVariants() as $child) {
             /** @var ProductVariantInterface $child */
