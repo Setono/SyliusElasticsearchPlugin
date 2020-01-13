@@ -15,6 +15,8 @@ class ProductTransformer extends ModelToElasticaAutoTransformer
             $identifier = (string) $identifier;
         }
 
-        return $this->transformObjectToDocument($object, [], $identifier);
+        return $this->transformObjectToDocument($object, [
+            'position' => $fields['position']
+        ], $identifier);
     }
 }

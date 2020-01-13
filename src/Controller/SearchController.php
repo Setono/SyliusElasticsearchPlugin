@@ -231,8 +231,10 @@ class SearchController extends Controller
                 break;
             case 'price':
                 $this->elasticSearchTaxonRepository->sortByPrice($sortDirection, $this->channelContext->getChannel());
-
                 break;
+
+            default:
+                $this->elasticSearchTaxonRepository->sortByPosition();
         }
 
         return $this->paginateProducts($request, $this->elasticSearchTaxonRepository->getQuery());

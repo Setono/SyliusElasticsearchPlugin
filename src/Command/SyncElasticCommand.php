@@ -232,6 +232,9 @@ class SyncElasticCommand extends ContainerAwareCommand
                                 ],
                             ],
                         ],
+                        'position' => [
+                            'type' => 'integer'
+                        ],
                         'createdAt' => [
                             'type' => 'date',
                         ],
