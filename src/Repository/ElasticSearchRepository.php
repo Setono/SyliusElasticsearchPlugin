@@ -134,6 +134,15 @@ class ElasticSearchRepository
         return $this;
     }
 
+    public function sortByPosition()
+    {
+        $this->sort[] = [
+            'position' => [
+                'order' => 'desc',
+            ],
+        ];
+    }
+
     public function sortByCreated(string $direction)
     {
         $this->sort[] = [
