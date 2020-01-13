@@ -9,14 +9,12 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('setono_sylius_elasticsearch');
         $rootNode
+            ->addDefaultsIfNotSet()
             ->children()
                 ->arrayNode('index_configs')
                     ->prototype('array')
@@ -33,15 +31,13 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
-                ->scalarNode('pagination')
-                    ->isRequired()
+                ->integerNode('pagination')
+                    ->min(1)
                     ->defaultValue(16)
-                    ->cannotBeEmpty()
                 ->end()
-                ->scalarNode('max_filter_options')
-                    ->isRequired()
+                ->integerNode('max_filter_options')
+                    ->min(1)
                     ->defaultValue(100)
-                    ->cannotBeEmpty()
                 ->end()
                 ->booleanNode('enable_product_variant_listener')
                     ->defaultValue(true)
