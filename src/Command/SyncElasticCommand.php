@@ -274,24 +274,36 @@ class SyncElasticCommand extends ContainerAwareCommand
             'types' => [
                 'default' => [
                     'properties' => [
-                        'description' => [
-                            'type' => 'text',
-                        ],
-                        'name' => [
-                            'type' => 'text',
-                            'fields' => [
-                                'keyword' => [
-                                    'type' => 'keyword',
+                        'translations' => [
+                            'type' => 'nested',
+                            'properties' => [
+                                'name' => [
+                                    'type' => 'text',
+                                    'fields' => [
+                                        'keyword' => [
+                                            'type' => 'keyword'
+                                        ]
+                                    ]
                                 ],
-                            ],
+                                'locale' => [
+                                    'type' => 'text',
+                                    'fields' => [
+                                        'keyword' => [
+                                            'type' => 'keyword'
+                                        ]
+                                    ]
+                                ],
+                                'description' => [
+                                    'type' => 'text'
+                                ]
+                            ]
                         ],
-                        'slug' => null,
                     ],
                     'persistence' => [
                         'driver' => 'orm',
                         'model' => '%sylius.model.taxon.class%',
                         'listener' => [
-                            'enabled' => false,
+                            'enabled' => true,
                         ],
                         'elastica_to_model_transformer' => [
                             'ignore_missing' => true,
