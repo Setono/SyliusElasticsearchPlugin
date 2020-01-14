@@ -123,6 +123,12 @@ class SearchController extends Controller
      */
     public function searchListAction(Request $request, string $queryString): Response
     {
+        if($request->isXmlHttpRequest()) {
+            return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
+                'results' => $this->search($request, $queryString),
+            ]);
+        }
+
         return $this->render('@SetonoSyliusElasticsearchPlugin/index.html.twig', [
             'query' => $queryString,
             'resultsUrl' => $request->getPathInfo() . '/results',
