@@ -138,7 +138,7 @@ class ElasticSearchRepository
     {
         $this->sort[] = [
             'position' => [
-                'order' => 'desc',
+                'order' => 'asc',
             ],
         ];
     }
