@@ -7,6 +7,9 @@ namespace Setono\SyliusElasticsearchPlugin\Controller;
 use Elastica\Query;
 use Elastica\Query\Nested;
 use Elastica\Query\QueryString;
+use Elastica\Query\Term;
+use Elastica\Query\Match;
+use Elastica\Query\BoolQuery;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use Pagerfanta\Pagerfanta;
 use Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository;
@@ -82,12 +85,18 @@ class SearchController extends Controller
         $products = $taxons = [];
         if (!empty($queryString)) {
             $productLimit = $request->get('plimit', 10);
+            $taxonLimit = $request->get('tlimit', 5);
+
             $translationsNested = new Nested();
             $translationsNested->setPath('translations');
             $queryStringObject = new QueryString($queryString . '~');
             $queryStringObject->setParam('fuzziness', '10');
 
-            $translationsNested->setQuery($queryStringObject);
+            $localeMatch = new Match('translations.locale', $this->localeContext->getLocaleCode());
+            $translationBool = new BoolQuery();
+            $translationBool->addMust($localeMatch);
+            $translationBool->addMust($queryStringObject);
+            $translationsNested->setQuery($translationBool);
 
             $queryObject = new Query($translationsNested);
             $queryObject->setSort(
@@ -97,10 +106,9 @@ class SearchController extends Controller
                     ]
                 ]
             );
-            $products = $this->productFinder->find($queryObject, $productLimit);
 
-            $taxonLimit = $request->get('tlimit', 5);
-            $taxons = $this->taxonFinder->find('*' . $queryString . '*', $taxonLimit);
+            $products = $this->productFinder->find($queryObject, $productLimit);
+            $taxons = $this->taxonFinder->find($queryObject, $taxonLimit);
         }
 
         return $this->render('@SyliusShop/Homepage/_search.html.twig', [
