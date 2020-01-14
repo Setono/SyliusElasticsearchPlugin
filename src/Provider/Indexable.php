@@ -8,7 +8,7 @@ use FOS\ElasticaBundle\Provider\Indexable as FOSIndexable;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 
-final class Indexable extends FOSIndexable
+class Indexable extends FOSIndexable
 {
     /**
      * @param string $indexName
