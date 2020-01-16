@@ -74,6 +74,10 @@ class ElasticSearchRepository
             $optionBoolQuery = new BoolQuery();
             $optionBoolQuery->addMust(new Match('options.code', $optionCode));
 
+            $optionBoolQuery->addMust(new Range('options.onHand', [
+                'gt' => 0
+            ]));
+
             $valueBoolQuery = new BoolQuery();
             $valueBoolQuery->addMust(new Terms('options.value.code', $values));
             $valueNested = new Nested();
