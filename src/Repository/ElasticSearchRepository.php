@@ -74,6 +74,7 @@ class ElasticSearchRepository
             $optionBoolQuery = new BoolQuery();
             $optionBoolQuery->addMust(new Match('options.code', $optionCode));
 
+            // Selected option needs to be in stock
             $optionBoolQuery->addMust(new Range('options.onHand', [
                 'gt' => 0
             ]));
