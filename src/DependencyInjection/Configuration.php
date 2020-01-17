@@ -42,6 +42,9 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('enable_product_variant_listener')
                     ->defaultValue(true)
                 ->end()
+                ->booleanNode('enable_product_taxon_listener')
+                    ->defaultValue(true)
+                ->end()
             ->end();
 
         return $treeBuilder;
