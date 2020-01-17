@@ -238,6 +238,17 @@ class SyncElasticCommand extends ContainerAwareCommand
                         'createdAt' => [
                             'type' => 'date',
                         ],
+                        'taxonPositions' => [
+                            'type' => 'nested',
+                            'properties' => [
+                                'taxonId' => [
+                                    'type' => 'integer'
+                                ],
+                                'position' => [
+                                    'type' => 'integer'
+                                ],
+                            ],
+                        ]
                     ],
                     'persistence' => [
                         'driver' => 'orm',
