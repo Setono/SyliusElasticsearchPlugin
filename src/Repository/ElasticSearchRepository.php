@@ -28,6 +28,9 @@ class ElasticSearchRepository
     /** @var array */
     private $sort = [];
 
+    /** @var TaxonInterface */
+    private $currentTaxonId = 0;
+
     private $maxFilterOptions;
 
     public function __construct(int $maxFilterOptions)
@@ -46,6 +49,7 @@ class ElasticSearchRepository
 
     public function whereTaxon(TaxonInterface $taxon)
     {
+        $this->currentTaxonId = $taxon->getId();
         $this->boolQuery->addMust(new Term(['taxons' => ['value' => $taxon->getId()]]));
 
         return $this;
@@ -142,8 +146,16 @@ class ElasticSearchRepository
     public function sortByPosition()
     {
         $this->sort[] = [
-            'position' => [
+            'taxonPositions.position' => [
                 'order' => 'asc',
+                'nested' => [
+                    'path' => 'taxonPositions',
+                    'filter' => [
+                        'match' => [
+                            'taxonPositions.taxonId' => $this->currentTaxonId,
+                        ],
+                    ],
+                ],
             ],
         ];
     }

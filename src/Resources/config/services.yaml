@@ -28,6 +28,13 @@ services:
     tags:
       - { name: kernel.event_subscriber }
 
+  setono_sylius_elasticsearch_plugin.property_builder.product_position_builder:
+    class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductPositionBuilder
+    arguments:
+      - "@sylius.repository.channel"
+    tags:
+      - { name: kernel.event_subscriber }
+
   setono_sylius_elasticsearch_plugin.property_builder.product_translations:
     class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductTranslationsBuilder
     arguments:
