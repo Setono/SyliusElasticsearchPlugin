@@ -23,7 +23,7 @@
     </div>
 </section>
 
-{% if results.nbResults > results.maxPerPage %}
+{% if results is not null and results.nbResults > results.maxPerPage %}
     <div class="container">
         {{ pagination.simple(results, {
             'prev_message': 'app.ui.pagination.previous'|trans,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\Controller;
 
+use Elastica\Exception\ResponseException;
 use Elastica\Query;
 use Elastica\Query\Nested;
 use Elastica\Query\QueryString;
@@ -257,7 +258,7 @@ class SearchController extends Controller
     /**
      * Perform a product search using the index defined for the active locale.
      */
-    private function search(Request $request, string $queryString = ''): Pagerfanta
+    private function search(Request $request, string $queryString = ''): ?Pagerfanta
     {
         /** @var ArrayGridProvider $gridProvider */
         $gridProvider = $this->get('sylius.grid.provider');
@@ -281,6 +282,14 @@ class SearchController extends Controller
         $paginator = $this->productFinder->findPaginated($queryObject);
         $paginator->setMaxPerPage($request->get('limit', $this->pagination));
         $paginator->setCurrentPage($request->get('page', 1));
+
+        try {
+            if (null === $paginator->getNbResults()) {
+                return null;
+            }
+        } catch (ResponseException $exception) {
+            return null;
+        }
 
         return $paginator;
     }
