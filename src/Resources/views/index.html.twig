@@ -3,7 +3,7 @@
 
 {% block content %}
 
-    {% if results.nbResults > 0 %}
+    {% if results is not null and results.nbResults > 0 %}
 
         {% if filters is defined %}
             <section class="taxon-filters">
