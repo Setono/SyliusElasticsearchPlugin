@@ -1,0 +1,16 @@
+app:
+    ui:
+        brand: Brand
+        price: Price
+        pagination:
+            result: Showing %resultStart% - %resultEnd% of %nbResults% products
+            previous: Back
+            next: Next
+        sort: Sort by
+        by_position: Best match
+        from_a_to_z: From A to Z
+        from_z_to_a: From Z to A
+        newest_first: Newest first
+        oldest_first: Oldest first
+        cheapest_first: Lowest price
+        most_expensive_first: Highest price

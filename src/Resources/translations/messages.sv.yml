@@ -1,0 +1,16 @@
+app:
+    ui:
+        brand: Märken
+        price: Pris
+        pagination:
+            result: Viser %resultStart% - %resultEnd% av %nbResults% artiklar
+            previous: Tillbaka
+            next: Nästa
+        sort: Sortera efter
+        by_position: Bästa matchningen
+        from_a_to_z: Från A till Z
+        from_z_to_a: Från Z till A
+        newest_first: Nyaste först
+        oldest_first: Äldst först
+        cheapest_first: Lägsta pris
+        most_expensive_first: Högsta pris

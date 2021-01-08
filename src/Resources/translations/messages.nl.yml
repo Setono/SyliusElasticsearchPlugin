@@ -1,0 +1,16 @@
+app:
+    ui:
+        brand: Merk
+        price: Prijs
+        pagination:
+            result: Bekijk %resultStart% - %resultEnd% van %nbResults% producten
+            previous: Terug
+            next: Volgende
+        sort: Sorteer op
+        by_position: Beste match
+        from_a_to_z: Van A tot Z
+        from_z_to_a: Van Z tot A
+        newest_first: Nieuwste eerst
+        oldest_first: Oudste eerst
+        cheapest_first: Laagste prijs
+        most_expensive_first: Hoogste prijs

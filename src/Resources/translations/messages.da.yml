@@ -1,17 +1,16 @@
 app:
-  ui:
-    brand: Mærke
-    price: Pris
-    pagination:
-      result: Viser %resultStart% - %resultEnd% af %nbResults% produkter
-      previous: Tilbage
-      next: Næste
-
-    sort: Sorter efter
-    by_position: Bedste match
-    from_a_to_z: Fra A til Z
-    from_z_to_a: Fra Z til A
-    newest_first: Nyeste først
-    oldest_first: Ældste først
-    cheapest_first: Billigste først
-    most_expensive_first: Dyreste først
+    ui:
+        brand: Mærke
+        price: Pris
+        pagination:
+            result: Viser %resultStart% - %resultEnd% af %nbResults% produkter
+            previous: Tilbage
+            next: Næste
+        sort: Sorter efter
+        by_position: Bedste match
+        from_a_to_z: Fra A til Z
+        from_z_to_a: Fra Z til A
+        newest_first: Nyeste først
+        oldest_first: Ældste først
+        cheapest_first: Billigste først
+        most_expensive_first: Dyreste først

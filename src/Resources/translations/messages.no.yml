@@ -1,0 +1,16 @@
+app:
+    ui:
+        brand: Bransje
+        price: Pris
+        pagination:
+            result: Viser %resultStart% - %resultEnd% av %nbResults% produkter
+            previous: Tilbake
+            next: Neste
+        sort: Sorter etter
+        by_position: Beste match
+        from_a_to_z: Fra A til Z
+        from_z_to_a: Fra Z til A
+        newest_first: Nyeste først
+        oldest_first: Eldste først
+        cheapest_first: Laveste pris
+        most_expensive_first: Høyeste pris
