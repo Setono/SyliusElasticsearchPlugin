@@ -1,11 +1,6 @@
 # Sylius Elasticsearch Plugin
 
-[![Latest Version on Packagist][ico-version]][link-packagist]
-[![Software License][ico-license]](LICENSE)
-[![Build Status][ico-travis]][link-travis]
-[![Quality Score][ico-code-quality]][link-code-quality]
-
-Gives you the ability to use Elasticsearch in your Sylius shop.
+DO NOT use this plugin - it's test plugin.
 
 ## Installation
 
@@ -60,7 +55,6 @@ setono_sylius_elasticsearch:
 ### Step 3: Indexing
 
 Run `php bin/console fo:el:po` to initialize the indices. Index update will be done automatically when products are altered.
-
 
 ## Contributors
 - [Jais Djurhuus-Kempel](https://github.com/JaisDK)
