@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\Command;
 
+use function Safe\file_put_contents;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,31 +19,24 @@ class SyncElasticCommand extends ContainerAwareCommand
     /** @var array */
     protected $config = [];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('setono:elastic-search:generate-config')
             ->setDescription('This command generate a new config file with Elastic Search indexes for products and taxon for every channel.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         $this->io = new SymfonyStyle($input, $output);
 
         $application = $this->getApplication();
-        $application->setCatchExceptions(false);
+        if (null !== $application) {
+            $application->setCatchExceptions(false);
+        }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$this->io->confirm('Please notice this command will delete and create a new "fos_elastica.yaml" and "setono_sylius_elasticsearch.yaml" file for you. Want to continue?', false)) {
             exit;
@@ -62,9 +56,11 @@ class SyncElasticCommand extends ContainerAwareCommand
         $this->makeProductIndexes();
         $this->makeTaxonIndexes();
         $this->saveConfigFiles();
+
+        return 0;
     }
 
-    protected function saveConfigFiles()
+    protected function saveConfigFiles(): void
     {
         $projectRoot = $this->getContainer()->getParameter('kernel.project_dir');
         $fosElasticaYamlFilePath = "{$projectRoot}/config/packages/fos_elastica.yaml";
@@ -88,7 +84,7 @@ class SyncElasticCommand extends ContainerAwareCommand
     /**
      * Dialog for setting op client connection
      */
-    protected function makeClient()
+    protected function makeClient(): void
     {
         $this->config['fos_elastica']['clients']['default'] = [
             'host' => $this->io->ask('Client hostname', 'elasticsearch'),
@@ -98,10 +94,8 @@ class SyncElasticCommand extends ContainerAwareCommand
 
     /**
      * Makes settings for elastic search index
-     *
-     * @return array
      */
-    protected function makeSettings()
+    protected function makeSettings(): array
     {
         return [
             'mapping' => [
@@ -127,7 +121,7 @@ class SyncElasticCommand extends ContainerAwareCommand
     /**
      * Makes indexes for products for every localized channel
      */
-    protected function makeProductIndexes()
+    protected function makeProductIndexes(): void
     {
         $this->config['fos_elastica']['indexes']['products'] = [
             'settings' => $this->makeSettings(),
@@ -233,7 +227,7 @@ class SyncElasticCommand extends ContainerAwareCommand
                             ],
                         ],
                         'position' => [
-                            'type' => 'integer'
+                            'type' => 'integer',
                         ],
                         'createdAt' => [
                             'type' => 'date',
@@ -242,13 +236,13 @@ class SyncElasticCommand extends ContainerAwareCommand
                             'type' => 'nested',
                             'properties' => [
                                 'taxonId' => [
-                                    'type' => 'integer'
+                                    'type' => 'integer',
                                 ],
                                 'position' => [
-                                    'type' => 'integer'
+                                    'type' => 'integer',
                                 ],
                             ],
-                        ]
+                        ],
                     ],
                     'persistence' => [
                         'driver' => 'orm',
@@ -278,7 +272,7 @@ class SyncElasticCommand extends ContainerAwareCommand
     /**
      * Makes indexes for taxons for every localized channel
      */
-    protected function makeTaxonIndexes()
+    protected function makeTaxonIndexes(): void
     {
         $this->config['fos_elastica']['indexes']['taxons'] = [
             'settings' => $this->makeSettings(),
@@ -292,22 +286,22 @@ class SyncElasticCommand extends ContainerAwareCommand
                                     'type' => 'text',
                                     'fields' => [
                                         'keyword' => [
-                                            'type' => 'keyword'
-                                        ]
-                                    ]
+                                            'type' => 'keyword',
+                                        ],
+                                    ],
                                 ],
                                 'locale' => [
                                     'type' => 'text',
                                     'fields' => [
                                         'keyword' => [
-                                            'type' => 'keyword'
-                                        ]
-                                    ]
+                                            'type' => 'keyword',
+                                        ],
+                                    ],
                                 ],
                                 'description' => [
-                                    'type' => 'text'
-                                ]
-                            ]
+                                    'type' => 'text',
+                                ],
+                            ],
                         ],
                     ],
                     'persistence' => [

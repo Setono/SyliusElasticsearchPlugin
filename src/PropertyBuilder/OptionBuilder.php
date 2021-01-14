@@ -7,7 +7,6 @@ namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
-use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Product\Model\ProductOptionTranslationInterface;
 use Sylius\Component\Product\Model\ProductOptionValueTranslationInterface;
 
@@ -16,9 +15,6 @@ use Sylius\Component\Product\Model\ProductOptionValueTranslationInterface;
  */
 final class OptionBuilder extends AbstractBuilder
 {
-    /**
-     * @param TransformEvent $event
-     */
     public function consumeEvent(TransformEvent $event): void
     {
         $this->buildProperty($event, ProductInterface::class,
@@ -27,15 +23,10 @@ final class OptionBuilder extends AbstractBuilder
             });
     }
 
-    /**
-     * @param ProductInterface $product
-     * @param Document         $document
-     */
     private function resolveProductOptions(ProductInterface $product, Document $document): void
     {
         $options = [];
         foreach ($product->getVariants() as $productVariant) {
-            /** @var ProductVariantInterface $productOptionValue */
             foreach ($productVariant->getOptionValues() as $productOptionValue) {
                 if (empty($productOptionValue->getValue())) {
                     continue;

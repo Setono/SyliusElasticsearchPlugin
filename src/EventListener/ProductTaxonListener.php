@@ -6,8 +6,6 @@ namespace Setono\SyliusElasticsearchPlugin\EventListener;
 
 use FOS\ElasticaBundle\Persister\ObjectPersisterInterface;
 use Sylius\Component\Core\Model\ProductTaxonInterface;
-use Sylius\Component\Core\Model\ProductVariantInterface;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 
 class ProductTaxonListener
 {

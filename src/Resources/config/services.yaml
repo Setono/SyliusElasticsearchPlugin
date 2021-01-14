@@ -19,6 +19,7 @@ services:
       - "@sylius.context.locale"
       - "@sylius.context.channel"
       - "@setono_sylius_elasticsearch_plugin.repository.elastic_search"
+      - "@event_dispatcher"
       - "%setono_sylius_elasticsearch.pagination%"
 
   setono_sylius_elasticsearch_plugin.property_builder.product_properties:

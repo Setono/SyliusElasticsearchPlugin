@@ -11,8 +11,6 @@ interface ProductRepositoryInterface
     /**
      * @param string $alias
      * @param null   $indexBy
-     *
-     * @return QueryBuilder
      */
     public function createEnabledProductQueryBuilder($alias, $indexBy = null): QueryBuilder;
 }

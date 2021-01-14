@@ -13,9 +13,6 @@ use Sylius\Component\Core\Model\ProductInterface;
  */
 final class ChannelsBuilder extends AbstractBuilder
 {
-    /**
-     * @param TransformEvent $event
-     */
     public function consumeEvent(TransformEvent $event): void
     {
         $this->buildProperty($event, ProductInterface::class,

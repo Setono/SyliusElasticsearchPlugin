@@ -13,14 +13,10 @@ use Sylius\Component\Core\Model\ChannelInterface;
  */
 abstract class AbstractBuilder implements PropertyBuilderInterface
 {
-    /**
-     * @var ChannelRepositoryInterface
-     */
+    /** @var ChannelRepositoryInterface */
     private $channelRepository;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $channelCache = [];
 
     public function __construct(ChannelRepositoryInterface $channelRepository)
@@ -28,11 +24,6 @@ abstract class AbstractBuilder implements PropertyBuilderInterface
         $this->channelRepository = $channelRepository;
     }
 
-    /**
-     * @param string $channelCode
-     *
-     * @return ChannelInterface|null
-     */
     protected function getChannel(string $channelCode): ?ChannelInterface
     {
         if (!isset($this->channelCache[$channelCode])) {

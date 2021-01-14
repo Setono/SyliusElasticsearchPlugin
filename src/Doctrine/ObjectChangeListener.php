@@ -9,43 +9,23 @@ use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use FOS\ElasticaBundle\Persister\PersisterRegistry;
 use FOS\ElasticaBundle\Provider\IndexableInterface;
-use Sylius\Component\Attribute\Model\AttributeSubjectInterface;
 use Sylius\Component\Core\Model\ProductTranslation;
 use Sylius\Component\Product\Model\ProductAttributeValue;
-use Sylius\Component\Resource\Model\TranslatableInterface;
 
-/**
- * @author jdk
- */
 class ObjectChangeListener implements EventSubscriber
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     private $modelClass;
 
-    /**
-     * @var PersisterRegistry
-     */
+    /** @var PersisterRegistry */
     private $persisterRegistry;
 
-    /**
-     * @var IndexableInterface
-     */
+    /** @var IndexableInterface */
     private $indexable;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $options;
 
-    /**
-     * ObjectChangeListener constructor.
-     *
-     * @param array              $options
-     * @param PersisterRegistry  $persisterRegistry
-     * @param IndexableInterface $indexable
-     */
     public function __construct(array $options, PersisterRegistry $persisterRegistry, IndexableInterface $indexable)
     {
         $this->options = $options;
@@ -54,31 +34,28 @@ class ObjectChangeListener implements EventSubscriber
         $this->indexable = $indexable;
     }
 
-    public function postUpdate(LifecycleEventArgs $args)
+    public function postUpdate(LifecycleEventArgs $args): void
     {
         if ($this->getParentModel($args->getObject()) instanceof $this->modelClass) {
             $this->sendProductUpdateEvent(Events::postUpdate, $args);
         }
     }
 
-    public function postPersist(LifecycleEventArgs $args)
+    public function postPersist(LifecycleEventArgs $args): void
     {
         if ($this->getParentModel($args->getObject()) instanceof $this->modelClass) {
             $this->sendProductUpdateEvent(Events::postPersist, $args);
         }
     }
 
-    public function preRemove(LifecycleEventArgs $args)
+    public function preRemove(LifecycleEventArgs $args): void
     {
         if ($this->getParentModel($args->getObject()) instanceof $this->modelClass) {
             $this->sendProductUpdateEvent(Events::preRemove, $args);
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getSubscribedEvents()
+    public function getSubscribedEvents(): array
     {
         return [
             Events::postPersist,
@@ -90,7 +67,7 @@ class ObjectChangeListener implements EventSubscriber
     /**
      * @param object $object
      *
-     * @return object|AttributeSubjectInterface|TranslatableInterface
+     * @return object
      */
     private function getParentModel($object)
     {

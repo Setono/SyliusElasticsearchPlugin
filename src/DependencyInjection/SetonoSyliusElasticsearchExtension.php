@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\DependencyInjection;
 
+use function Safe\sprintf;
 use Setono\SyliusElasticsearchPlugin\Doctrine\ObjectChangeListener;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -12,12 +13,7 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class SetonoSyliusElasticsearchExtension extends Extension
 {
-    /**
-     * {@inheritdoc}
-     *
-     * @throws \Exception
-     */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $config = $this->processConfiguration(new Configuration(), $configs);
 

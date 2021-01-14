@@ -20,7 +20,7 @@ use Elastica\Query\Terms;
 use Sylius\Component\Channel\Model\ChannelInterface;
 use Sylius\Component\Core\Model\TaxonInterface;
 
-class ElasticSearchRepository
+final class ElasticSearchRepository
 {
     /** @var BoolQuery */
     private $boolQuery;
@@ -40,14 +40,14 @@ class ElasticSearchRepository
         $this->maxFilterOptions = $maxFilterOptions;
     }
 
-    public function whereChannel(ChannelInterface $channel)
+    public function whereChannel(ChannelInterface $channel): self
     {
         $this->boolQuery->addMust(new Term(['channels' => ['value' => $channel->getCode()]]));
 
         return $this;
     }
 
-    public function whereTaxon(TaxonInterface $taxon)
+    public function whereTaxon(TaxonInterface $taxon): self
     {
         $this->currentTaxonId = $taxon->getId();
         $this->boolQuery->addMust(new Term(['taxons' => ['value' => $taxon->getId()]]));
@@ -55,7 +55,7 @@ class ElasticSearchRepository
         return $this;
     }
 
-    public function whereBrands(array $brandCodes)
+    public function whereBrands(array $brandCodes): self
     {
         $boolQuery = new BoolQuery();
         $boolQuery->addMust(new Terms('brand.code', $brandCodes));
@@ -68,7 +68,7 @@ class ElasticSearchRepository
         return $this;
     }
 
-    public function whereOptions(array $options)
+    public function whereOptions(array $options): self
     {
         foreach ($options as $optionCode => $values) {
             if (!is_array($values)) {
@@ -80,7 +80,7 @@ class ElasticSearchRepository
 
             // Selected option needs to be in stock
             $optionBoolQuery->addMust(new Range('options.onHand', [
-                'gt' => 0
+                'gt' => 0,
             ]));
 
             $valueBoolQuery = new BoolQuery();
@@ -99,7 +99,7 @@ class ElasticSearchRepository
         return $this;
     }
 
-    public function whereAttributes(array $attributes, string $localeCode)
+    public function whereAttributes(array $attributes, string $localeCode): self
     {
         foreach ($attributes as $attributesCode => $values) {
             if (!is_array($values)) {
@@ -126,7 +126,7 @@ class ElasticSearchRepository
         return $this;
     }
 
-    public function whereChannelPrice(int $gte, int $lte, ChannelInterface $channel)
+    public function whereChannelPrice(int $gte, int $lte, ChannelInterface $channel): self
     {
         $boolQuery = new BoolQuery();
         $boolQuery->addMust(new Match('prices.channel', $channel->getCode()));
@@ -143,7 +143,7 @@ class ElasticSearchRepository
         return $this;
     }
 
-    public function sortByPosition()
+    public function sortByPosition(): void
     {
         $this->sort[] = [
             'taxonPositions.position' => [
@@ -160,7 +160,7 @@ class ElasticSearchRepository
         ];
     }
 
-    public function sortByCreated(string $direction)
+    public function sortByCreated(string $direction): void
     {
         $this->sort[] = [
             'createdAt' => [
@@ -169,7 +169,7 @@ class ElasticSearchRepository
         ];
     }
 
-    public function sortByProductName(string $direction, string $localeCode)
+    public function sortByProductName(string $direction, string $localeCode): void
     {
         $this->sort[] = [
             'translations.name.keyword' => [
@@ -186,7 +186,7 @@ class ElasticSearchRepository
         ];
     }
 
-    public function sortByPrice(string $direction, ChannelInterface $channel)
+    public function sortByPrice(string $direction, ChannelInterface $channel): void
     {
         $this->sort[] = [
             'prices.price' => [
@@ -203,7 +203,7 @@ class ElasticSearchRepository
         ];
     }
 
-    public function getAvailableFilters(ChannelInterface $channel, string $localeCode, TaxonInterface $taxon)
+    public function getAvailableFilters(ChannelInterface $channel, string $localeCode, TaxonInterface $taxon): Query
     {
         $query = $this->whereChannel($channel)
             ->whereTaxon($taxon)
@@ -270,7 +270,7 @@ class ElasticSearchRepository
         return $query;
     }
 
-    public function resetQuery()
+    public function resetQuery(): void
     {
         $this->boolQuery = new BoolQuery();
     }

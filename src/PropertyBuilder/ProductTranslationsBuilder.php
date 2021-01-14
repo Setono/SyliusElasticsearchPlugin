@@ -26,10 +26,6 @@ final class ProductTranslationsBuilder extends AbstractBuilder
         );
     }
 
-    /**
-     * @param ProductInterface $product
-     * @param Document $document
-     */
     private function resolveProductTranslations(ProductInterface $product, Document $document): void
     {
         $translations = [];

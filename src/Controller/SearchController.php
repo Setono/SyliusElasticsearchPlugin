@@ -6,23 +6,23 @@ namespace Setono\SyliusElasticsearchPlugin\Controller;
 
 use Elastica\Exception\ResponseException;
 use Elastica\Query;
+use Elastica\Query\BoolQuery;
+use Elastica\Query\Match;
 use Elastica\Query\Nested;
 use Elastica\Query\QueryString;
-use Elastica\Query\Term;
-use Elastica\Query\Match;
-use Elastica\Query\BoolQuery;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use Pagerfanta\Pagerfanta;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Setono\SyliusElasticsearchPlugin\Event\ProductIndexEvent;
 use Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 use Sylius\Bundle\TaxonomyBundle\Doctrine\ORM\TaxonRepository;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Core\Model\Taxon;
 use Sylius\Component\Core\Model\TaxonInterface;
-use Sylius\Component\Grid\Provider\ArrayGridProvider;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
-use Sylius\Component\Product\Model\ProductAttribute;
-use Sylius\Component\Product\Model\ProductOption;
+use Sylius\Component\Product\Model\ProductAttributeInterface;
+use Sylius\Component\Product\Model\ProductOptionInterface;
 use Sylius\Component\Product\Repository\ProductOptionRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,27 +45,32 @@ class SearchController extends Controller
     /** @var PaginatedFinderInterface */
     private $taxonFinder;
 
-    /** @var string */
+    /** @var LocaleContextInterface */
     private $localeContext;
 
-    /** @var string */
+    /** @var ChannelContextInterface */
     private $channelContext;
 
     /** @var ElasticSearchRepository */
     private $elasticSearchTaxonRepository;
 
+    /** @var EventDispatcherInterface */
+    private $eventDispatcher;
+
     /** @var int */
     private $pagination;
 
-    public function __construct(TaxonRepository $taxonRepository,
-                                ProductOptionRepositoryInterface $productOptionRepository,
-                                EntityRepository $productAttributeRepository,
-                                PaginatedFinderInterface $productFinder,
-                                PaginatedFinderInterface $taxonFinder,
-                                LocaleContextInterface $localeContext,
-                                ChannelContextInterface $channelContext,
-                                ElasticSearchRepository $elasticSearchTaxonRepository,
-                                int $pagination
+    public function __construct(
+        TaxonRepository $taxonRepository,
+        ProductOptionRepositoryInterface $productOptionRepository,
+        EntityRepository $productAttributeRepository,
+        PaginatedFinderInterface $productFinder,
+        PaginatedFinderInterface $taxonFinder,
+        LocaleContextInterface $localeContext,
+        ChannelContextInterface $channelContext,
+        ElasticSearchRepository $elasticSearchTaxonRepository,
+        EventDispatcherInterface $eventDispatcher,
+        int $pagination
     ) {
         $this->taxonRepository = $taxonRepository;
         $this->productOptionRepository = $productOptionRepository;
@@ -75,6 +80,7 @@ class SearchController extends Controller
         $this->localeContext = $localeContext;
         $this->channelContext = $channelContext;
         $this->elasticSearchTaxonRepository = $elasticSearchTaxonRepository;
+        $this->eventDispatcher = $eventDispatcher;
         $this->pagination = $pagination;
     }
 
@@ -84,7 +90,7 @@ class SearchController extends Controller
     public function searchAjaxAction(Request $request, string $queryString): Response
     {
         $products = $taxons = [];
-        if (!empty($queryString)) {
+        if ('' !== $queryString) {
             $productLimit = $request->get('plimit', 10);
             $taxonLimit = $request->get('tlimit', 5);
 
@@ -103,8 +109,8 @@ class SearchController extends Controller
             $queryObject->setSort(
                 [
                     '_score' => [
-                        'order' => 'desc'
-                    ]
+                        'order' => 'desc',
+                    ],
                 ]
             );
 
@@ -124,7 +130,7 @@ class SearchController extends Controller
      */
     public function searchListAction(Request $request, string $queryString): Response
     {
-        if($request->isXmlHttpRequest()) {
+        if ($request->isXmlHttpRequest()) {
             return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
                 'results' => $this->search($request, $queryString),
             ]);
@@ -152,7 +158,7 @@ class SearchController extends Controller
         /** @var Taxon $taxon */
         $taxon = $this->taxonRepository->findOneBySlug($slug, $this->localeContext->getLocaleCode());
 
-        if($request->isXmlHttpRequest()) {
+        if ($request->isXmlHttpRequest()) {
             return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
                 'results' => $this->getResults($request, $taxon),
             ]);
@@ -160,28 +166,26 @@ class SearchController extends Controller
 
         $filtersPaginator = $this->productFinder->findPaginated($this->elasticSearchTaxonRepository->getAvailableFilters($this->channelContext->getChannel(), $this->localeContext->getLocaleCode(), $taxon));
         $filtersPaginator->setMaxPerPage($this->pagination);
-        $filters = $this->getFilterTranslations($filtersPaginator->getAdapter()->getAggregations());
+        $filters = $filtersPaginator->getAdapter()->getAggregations();
 
         $results = $this->getResults($request, $taxon);
         $resultsUrl = $request->getPathInfo();
 
         // Make product option name index
         $productOptionNameIndex = [];
+        /** @var ProductOptionInterface $productOption */
         foreach ($this->productOptionRepository->findAll() as $productOption) {
-            /**
-             * @var ProductOption
-             */
             $productOptionNameIndex[$productOption->getCode()] = $productOption->getTranslation()->getName();
         }
 
         // Make product attribute name index
         $productAttributeNameIndex = [];
+        /** @var ProductAttributeInterface $productAttribute */
         foreach ($this->productAttributeRepository->findAll() as $productAttribute) {
-            /**
-             * @var ProductAttribute
-             */
             $productAttributeNameIndex[$productAttribute->getCode()] = $productAttribute->getName();
         }
+
+        $this->eventDispatcher->dispatch(new ProductIndexEvent($results, $taxon));
 
         return $this->render('@SetonoSyliusElasticsearchPlugin/index.html.twig', [
             'isCategory' => true,
@@ -205,7 +209,7 @@ class SearchController extends Controller
         ]);
     }
 
-    public function getResults(Request $request, TaxonInterface $taxon)
+    public function getResults(Request $request, TaxonInterface $taxon): Pagerfanta
     {
         $this->elasticSearchTaxonRepository
             ->whereChannel($this->channelContext->getChannel())
@@ -226,10 +230,10 @@ class SearchController extends Controller
             $this->elasticSearchTaxonRepository->whereAttributes($attributes, $this->localeContext->getLocaleCode());
         }
 
-        $priceFrom = $request->get('price_from');
-        $priceTo = $request->get('price_to');
-        if ($priceFrom && $priceTo) {
-            $this->elasticSearchTaxonRepository->whereChannelPrice((int) $priceFrom, (int) $priceTo, $this->channelContext->getChannel());
+        $priceFrom = (int) $request->get('price_from', 0);
+        $priceTo = (int) $request->get('price_to', 0);
+        if ($priceFrom > 0 && $priceTo > 0 && $priceTo > $priceFrom) {
+            $this->elasticSearchTaxonRepository->whereChannelPrice($priceFrom, $priceTo, $this->channelContext->getChannel());
         }
 
         $sortField = $request->get('sort_field');
@@ -246,8 +250,8 @@ class SearchController extends Controller
                 break;
             case 'price':
                 $this->elasticSearchTaxonRepository->sortByPrice($sortDirection, $this->channelContext->getChannel());
-                break;
 
+                break;
             default:
                 $this->elasticSearchTaxonRepository->sortByPosition();
         }
@@ -260,10 +264,6 @@ class SearchController extends Controller
      */
     private function search(Request $request, string $queryString = ''): ?Pagerfanta
     {
-        /** @var ArrayGridProvider $gridProvider */
-        $gridProvider = $this->get('sylius.grid.provider');
-        $grid = $gridProvider->get('sylius_shop_product');
-
         $translationsNested = new Nested();
         $translationsNested->setPath('translations');
         $queryStringObject = new QueryString($queryString . '~');
@@ -275,8 +275,8 @@ class SearchController extends Controller
         $queryObject->setSort(
             [
                 '_score' => [
-                    'order' => 'desc'
-                ]
+                    'order' => 'desc',
+                ],
             ]
         );
         $paginator = $this->productFinder->findPaginated($queryObject);
@@ -294,20 +294,12 @@ class SearchController extends Controller
         return $paginator;
     }
 
-    private function paginateProducts(Request $request, $query)
+    private function paginateProducts(Request $request, Query $query): Pagerfanta
     {
-        $gridProvider = $this->get('sylius.grid.provider');
-        $grid = $gridProvider->get('sylius_shop_product');
-
         $paginator = $this->productFinder->findPaginated($query);
         $paginator->setMaxPerPage($request->get('limit', $this->pagination));
         $paginator->setCurrentPage($request->get('page', 1));
 
         return $paginator;
-    }
-
-    private function getFilterTranslations(array $filters)
-    {
-        return $filters;
     }
 }

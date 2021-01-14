@@ -6,7 +6,6 @@ namespace Setono\SyliusElasticsearchPlugin\EventListener;
 
 use FOS\ElasticaBundle\Persister\ObjectPersisterInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 
 class ProductVariantListener
 {
@@ -29,10 +28,11 @@ class ProductVariantListener
         }
 
         $product = $variant->getProduct();
-        foreach($product->getVariants() as $child) {
+        foreach ($product->getVariants() as $child) {
             /** @var ProductVariantInterface $child */
             if ($child->getOnHand() > 0) {
                 $this->persister->replaceOne($product);
+
                 return;
             }
         }
