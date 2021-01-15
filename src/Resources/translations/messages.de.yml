@@ -1,16 +1,16 @@
 app:
     ui:
-        brand: Brand
-        price: Price
+        brand: Marke
+        price: Preis
         pagination:
-            result: Showing %resultStart% - %resultEnd% of %nbResults% products
-            previous: Back
-            next: Next
-        sort: Sort by
-        by_position: Best match
-        from_a_to_z: From A to Z
-        from_z_to_a: From Z to A
-        newest_first: Newest first
-        oldest_first: Oldest first
-        cheapest_first: Lowest price
-        most_expensive_first: Highest price
+            result: Es werden %resultStart% - %resultEnd% von %nbResults% Produkten angezeigt
+            previous: Zurück
+            next: Weiter
+        sort: Sortieren nach
+        by_position: Beste Übereinstimmung
+        from_a_to_z: Von A bis Z
+        from_z_to_a: Von Z bis A
+        newest_first: Neueste zuerst
+        oldest_first: Älteste zuerst
+        cheapest_first: Niedrigster Preis
+        most_expensive_first: Höchster Preis
