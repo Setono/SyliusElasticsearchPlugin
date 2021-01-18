@@ -32,7 +32,7 @@ class ProductListener
         $this->entityManager = $entityManager;
     }
 
-    public function handlePostCreate(ResourceControllerEvent $event)
+    public function handlePostCreate(ResourceControllerEvent $event): void
     {
         if (!$this->enabled) {
             return;
@@ -47,7 +47,7 @@ class ProductListener
 
         foreach ($product->getVariants() as $child) {
             /** @var ProductVariantInterface $child */
-            if (!$child->isTracked() || $child->getOnHand() > 0) {
+            if ($child->getOnHand() > 0) {
                 $this->persister->insertOne($product);
 
                 return;
