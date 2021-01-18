@@ -54,4 +54,40 @@ class ProductListener
             }
         }
     }
+
+    public function handlePostUpdate(ResourceControllerEvent $event): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        /** @var ProductInterface|null $product */
+        $product = $event->getSubject();
+        Assert::isInstanceOf($product, ProductInterface::class);
+
+        // Refresh the entity to be sure that any insertion made without updating directly the object is taken in account
+        $this->entityManager->refresh($product);
+
+        foreach ($product->getVariants() as $child) {
+            /** @var ProductVariantInterface $child */
+            if ($child->getOnHand() > 0) {
+                $this->persister->replaceOne($product);
+
+                return;
+            }
+        }
+    }
+
+    public function handlePostDelete(ResourceControllerEvent $event): void
+    {
+        if (!$this->enabled) {
+            return;
+        }
+
+        /** @var ProductInterface|null $product */
+        $product = $event->getSubject();
+        Assert::isInstanceOf($product, ProductInterface::class);
+
+        $this->persister->deleteOne($product);
+    }
 }
