@@ -38,7 +38,7 @@ class ProductListener
             return;
         }
 
-        /** @var ProductInterface $product */
+        /** @var ProductInterface|null $product */
         $product = $event->getSubject();
         Assert::isInstanceOf($product, ProductInterface::class);
 
