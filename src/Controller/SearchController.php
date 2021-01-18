@@ -27,6 +27,7 @@ use Sylius\Component\Product\Repository\ProductOptionRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SearchController extends Controller
 {
@@ -155,8 +156,11 @@ class SearchController extends Controller
 
     public function searchTaxonAction(Request $request, string $slug): Response
     {
-        /** @var Taxon $taxon */
+        /** @var TaxonInterface|null $taxon */
         $taxon = $this->taxonRepository->findOneBySlug($slug, $this->localeContext->getLocaleCode());
+        if (null === $taxon) {
+            throw new NotFoundHttpException(\Safe\sprintf('The taxon with slug "%s" for locale "%s" does not exist', $slug, $this->localeContext->getLocaleCode()));
+        }
 
         if ($request->isXmlHttpRequest()) {
             return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
