@@ -21,7 +21,7 @@ class ProductVariantListener
         $this->enabled = $enabled;
     }
 
-    public function postUpdate(ProductVariantInterface $variant)
+    public function postUpdate(ProductVariantInterface $variant): void
     {
         if (!$this->enabled) {
             return;

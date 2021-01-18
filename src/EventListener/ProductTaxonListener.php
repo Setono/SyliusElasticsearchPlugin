@@ -21,7 +21,7 @@ class ProductTaxonListener
         $this->enabled = $enabled;
     }
 
-    private function reindexProductIfEnabled(ProductTaxonInterface $productTaxon)
+    private function reindexProductIfEnabled(ProductTaxonInterface $productTaxon): void
     {
         if (!$this->enabled) {
             return;
@@ -31,17 +31,17 @@ class ProductTaxonListener
         $this->persister->replaceOne($product);
     }
 
-    public function postUpdate(ProductTaxonInterface $productTaxon)
+    public function postUpdate(ProductTaxonInterface $productTaxon): void
     {
         $this->reindexProductIfEnabled($productTaxon);
     }
 
-    public function postPersist(ProductTaxonInterface $productTaxon)
+    public function postPersist(ProductTaxonInterface $productTaxon): void
     {
         $this->reindexProductIfEnabled($productTaxon);
     }
 
-    public function postRemove(ProductTaxonInterface $productTaxon)
+    public function postRemove(ProductTaxonInterface $productTaxon): void
     {
         $this->reindexProductIfEnabled($productTaxon);
     }

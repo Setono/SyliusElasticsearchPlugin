@@ -120,6 +120,26 @@ services:
         event: 'postRemove'
         entity: '%sylius.model.product_taxon.class%'
 
+  setono_sylius_elasticsearch_plugin.listener.product_listener:
+    class: Setono\SyliusElasticsearchPlugin\EventListener\ProductListener
+    arguments:
+      - "@fos_elastica.object_persister.products.default"
+      - "%setono_sylius_elasticsearch.enable_product_taxon_listener%"
+      - '@doctrine.orm.entity_manager'
+    tags:
+      -   name: 'kernel.event_listener'
+          event: 'sylius.product.post_create'
+          method: 'handlePostCreate'
+          priority: -200 # Be sure to load this listener quite late
+      -   name: 'kernel.event_listener'
+          event: 'sylius.product.post_update'
+          method: 'handlePostUpdate'
+          priority: -200 # Be sure to load this listener quite late
+      -   name: 'kernel.event_listener'
+          event: 'sylius.product.post_delete'
+          method: 'handlePostDelete'
+          priority: -200 # Be sure to load this listener quite late
+
   setono_sylius_elasticsearch_plugin.provider.indexable:
     class: 'Setono\SyliusElasticsearchPlugin\Provider\Indexable'
     decorates: 'fos_elastica.indexable'
