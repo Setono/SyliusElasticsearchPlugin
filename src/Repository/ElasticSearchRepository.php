@@ -55,6 +55,15 @@ final class ElasticSearchRepository
         return $this;
     }
 
+    public function whereStock(): self
+    {
+        $this->boolQuery->addMust(new Range('stock', [
+            'gte' => 1,
+        ]));
+
+        return $this;
+    }
+
     public function whereBrands(array $brandCodes): self
     {
         $boolQuery = new BoolQuery();
@@ -77,11 +86,6 @@ final class ElasticSearchRepository
 
             $optionBoolQuery = new BoolQuery();
             $optionBoolQuery->addMust(new Match('options.code', $optionCode));
-
-            // Selected option needs to be in stock
-            $optionBoolQuery->addMust(new Range('options.onHand', [
-                'gt' => 0,
-            ]));
 
             $valueBoolQuery = new BoolQuery();
             $valueBoolQuery->addMust(new Terms('options.value.code', $values));
