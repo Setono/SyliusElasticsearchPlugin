@@ -217,7 +217,8 @@ class SearchController extends Controller
     {
         $this->elasticSearchTaxonRepository
             ->whereChannel($this->channelContext->getChannel())
-            ->whereTaxon($taxon);
+            ->whereTaxon($taxon)
+            ->whereStock();
 
         $brands = $request->get('brands');
         if (is_array($brands)) {
