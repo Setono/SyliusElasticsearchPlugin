@@ -32,7 +32,9 @@ final class ProductPropertiesBuilder extends AbstractBuilder
                         break;
                     }
 
-                    $stock += $variant->getOnHand() - $variant->getOnHold();
+                    $onHand = $variant->getOnHand() ?? 0;
+                    $onHold = $variant->getOnHold() ?? 0;
+                    $stock += $onHand - $onHold;
                 }
                 $document->set('stock', $stock);
             }
