@@ -90,6 +90,7 @@ class SearchController extends Controller
      */
     public function searchAjaxAction(Request $request, string $queryString): Response
     {
+        $products = $taxons = [];
         if ('' !== $queryString) {
             $productLimit = $request->get('plimit', 10);
             $taxonLimit = $request->get('tlimit', 5);
