@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Setono\SyliusElasticsearchPlugin\EventListener;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\ORMInvalidArgumentException;
 use FOS\ElasticaBundle\Persister\ObjectPersisterInterface;
 use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Sylius\Component\Core\Model\ProductInterface;
@@ -43,7 +44,10 @@ class ProductListener
         Assert::isInstanceOf($product, ProductInterface::class);
 
         // Refresh the entity to be sure that any insertion made without updating directly the object is taken in account
-        $this->entityManager->refresh($product);
+        try {
+            $this->entityManager->refresh($product);
+        } catch (ORMInvalidArgumentException $exception) {
+        }
 
         foreach ($product->getVariants() as $child) {
             /** @var ProductVariantInterface $child */
@@ -66,7 +70,10 @@ class ProductListener
         Assert::isInstanceOf($product, ProductInterface::class);
 
         // Refresh the entity to be sure that any insertion made without updating directly the object is taken in account
-        $this->entityManager->refresh($product);
+        try {
+            $this->entityManager->refresh($product);
+        } catch (ORMInvalidArgumentException $exception) {
+        }
 
         foreach ($product->getVariants() as $child) {
             /** @var ProductVariantInterface $child */
