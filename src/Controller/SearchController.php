@@ -97,13 +97,24 @@ class SearchController extends Controller
 
             $translationsNested = new Nested();
             $translationsNested->setPath('translations');
-            $queryStringObject = new QueryString($queryString . '~');
-            $queryStringObject->setParam('fuzziness', '10');
+            $translationOr = new BoolQuery();
+
+            $queryStringNameObject = new QueryString($queryString . '~');
+            $queryStringNameObject->setFields(['translations.name']);
+            $queryStringNameObject->setParam('fuzziness', '6');
+            $queryStringNameObject->setBoost(2);
+            $translationOr->addShould($queryStringNameObject);
+
+            $queryStringDescriptionObject = new QueryString($queryString . '~');
+            $queryStringDescriptionObject->setFields(['translations.description']);
+            $queryStringDescriptionObject->setParam('fuzziness', '2');
+            $queryStringDescriptionObject->setBoost(0.1);
+            $translationOr->addShould($queryStringDescriptionObject);
 
             $localeMatch = new Match('translations.locale', $this->localeContext->getLocaleCode());
             $translationBool = new BoolQuery();
             $translationBool->addMust($localeMatch);
-            $translationBool->addMust($queryStringObject);
+            $translationBool->addMust($translationOr);
             $translationsNested->setQuery($translationBool);
 
             $queryObject = new Query($translationsNested);
