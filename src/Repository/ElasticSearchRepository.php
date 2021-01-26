@@ -87,6 +87,11 @@ final class ElasticSearchRepository
             $optionBoolQuery = new BoolQuery();
             $optionBoolQuery->addMust(new Match('options.code', $optionCode));
 
+            // Selected option needs to be in stock
+            $optionBoolQuery->addMust(new Range('options.onHand', [
+                'gt' => 0,
+            ]));
+
             $valueBoolQuery = new BoolQuery();
             $valueBoolQuery->addMust(new Terms('options.value.code', $values));
             $valueNested = new Nested();

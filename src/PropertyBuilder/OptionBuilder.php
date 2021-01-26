@@ -46,7 +46,7 @@ final class OptionBuilder extends AbstractBuilder
                     'code' => $productOptionValue->getOption()->getCode(),
                     'translations' => $translations,
                     'value' => [],
-                    'onHand' => $productVariant->getOnHand(),
+                    'onHand' => $productVariant->isTracked() ? 1 : $productVariant->getOnHand() - $productVariant->getOnHold(),
                 ];
 
                 /** @var ProductOptionValueTranslationInterface $translation */
