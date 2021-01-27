@@ -283,7 +283,7 @@ class SearchController extends Controller
         $translationsNested = new Nested();
         $translationsNested->setPath('translations');
         $queryStringObject = new QueryString($queryString . '~');
-        $queryStringObject->setParam('fuzziness', '10');
+        $queryStringObject->setParam('fuzziness', 'auto');
 
         $translationsNested->setQuery($queryStringObject);
 
