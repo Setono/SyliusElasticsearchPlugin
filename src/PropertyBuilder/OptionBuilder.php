@@ -7,6 +7,7 @@ namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 use Elastica\Document;
 use FOS\ElasticaBundle\Event\TransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Product\Model\ProductOptionTranslationInterface;
 use Sylius\Component\Product\Model\ProductOptionValueTranslationInterface;
 
@@ -26,6 +27,7 @@ final class OptionBuilder extends AbstractBuilder
     private function resolveProductOptions(ProductInterface $product, Document $document): void
     {
         $options = [];
+        /** @var ProductVariantInterface $productVariant */
         foreach ($product->getVariants() as $productVariant) {
             foreach ($productVariant->getOptionValues() as $productOptionValue) {
                 if (empty($productOptionValue->getValue())) {
@@ -46,7 +48,7 @@ final class OptionBuilder extends AbstractBuilder
                     'code' => $productOptionValue->getOption()->getCode(),
                     'translations' => $translations,
                     'value' => [],
-                    'onHand' => $productVariant->isTracked() ? 1 : $productVariant->getOnHand() - $productVariant->getOnHold(),
+                    'onHand' => $productVariant->isTracked() ? (int) $productVariant->getOnHand() - (int) $productVariant->getOnHold() : 1,
                 ];
 
                 /** @var ProductOptionValueTranslationInterface $translation */
