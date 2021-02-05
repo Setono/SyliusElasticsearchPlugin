@@ -255,6 +255,11 @@ class SearchController extends Controller
         $sortField = $request->get('sort_field');
         $sortDirection = $request->get('sort_direction');
 
+        if (null === $sortField && $taxon->getCode() === 'nyheder') {
+            $sortField = 'createdAt';
+            $sortDirection = 'desc';
+        }
+
         switch ($sortField) {
             case 'createdAt':
                 $this->elasticSearchTaxonRepository->sortByCreated($sortDirection);
@@ -270,6 +275,8 @@ class SearchController extends Controller
                 break;
             default:
                 $this->elasticSearchTaxonRepository->sortByPosition();
+
+                break;
         }
 
         return $this->paginateProducts($request, $this->elasticSearchTaxonRepository->getQuery());
