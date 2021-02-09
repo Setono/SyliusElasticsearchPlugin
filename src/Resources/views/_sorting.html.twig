@@ -4,7 +4,7 @@
     {% set route_parameters = app.request.attributes.get('_route_params') %}
     {% set criteria = app.request.query.all %}
 
-    {% set default_path = path(route, route_parameters|merge(criteria)) %}
+    {% set default_path = path(route, route_parameters|merge(criteria)|merge({'sorting': {'position': 'asc'}})) %}
     {% set from_a_to_z_path = path(route, route_parameters|merge(criteria)|merge({'sorting': {'name': 'asc'}})) %}
     {% set from_z_to_a_path = path(route, route_parameters|merge(criteria)|merge({'sorting': {'name': 'desc'}})) %}
     {% set oldest_first_path = path(route, route_parameters|merge(criteria)|merge({'sorting': {'createdAt': 'asc'}})) %}
@@ -12,7 +12,7 @@
     {% set cheapest_first_path = path(route, route_parameters|merge(criteria)|merge({'sorting': {'price': 'asc'}})) %}
     {% set most_expensive_first_path = path(route, route_parameters|merge(criteria)|merge({'sorting': {'price': 'desc'}})) %}
 
-    {% if app.request.query.get('sorting') is empty %}
+    {% if app.request.query.get('sorting') is empty or (app.request.query.get('sorting').position is defined and app.request.query.get('sorting').position == 'asc') %}
         {% set current_sorting_label = 'app.ui.by_position'|trans|lower %}
     {% elseif app.request.query.get('sorting').name is defined and app.request.query.get('sorting').name == 'asc'%}
         {% set current_sorting_label = 'app.ui.from_a_to_z'|trans|lower %}
@@ -35,7 +35,7 @@
                 <div class="text">{{ current_sorting_label }}</div>
                 <i class="dropdown icon"></i>
                 <div class="menu">
-                    <a class="item" href="#" data-field="" data-direction="" data-text="{{ 'app.ui.by_position'|trans|lower }}">{{ 'app.ui.by_position'|trans }}</a>
+                    <a class="item" href="#" data-field="position" data-direction="asc" data-text="{{ 'app.ui.by_position'|trans|lower }}">{{ 'app.ui.by_position'|trans }}</a>
                     <a class="item" href="#" data-field="name" data-direction="asc" data-text="{{ 'app.ui.from_a_to_z'|trans|lower }}">{{ 'app.ui.from_a_to_z'|trans }}</a>
                     <a class="item" href="#" data-field="name" data-direction="desc" data-text="{{ 'app.ui.from_z_to_a'|trans|lower }}">{{ 'app.ui.from_z_to_a'|trans }}</a>
                     <a class="item" href="#" data-field="createdAt" data-direction="desc" data-text="{{ 'app.ui.newest_first'|trans|lower }}">{{ 'app.ui.newest_first'|trans }}</a>
