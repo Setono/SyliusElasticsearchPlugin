@@ -155,16 +155,8 @@ final class ElasticSearchRepository
     public function sortByPosition(): void
     {
         $this->sort[] = [
-            'taxonPositions.position' => [
+            'position' => [
                 'order' => 'asc',
-                'nested' => [
-                    'path' => 'taxonPositions',
-                    'filter' => [
-                        'match' => [
-                            'taxonPositions.taxonId' => $this->currentTaxonId,
-                        ],
-                    ],
-                ],
             ],
         ];
     }
