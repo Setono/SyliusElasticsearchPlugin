@@ -227,6 +227,7 @@ class SearchController extends Controller
     public function getResults(Request $request, TaxonInterface $taxon): Pagerfanta
     {
         $this->elasticSearchTaxonRepository
+            ->whereEnabled()
             ->whereChannel($this->channelContext->getChannel())
             ->whereTaxon($taxon)
             ->whereStock();

@@ -22,6 +22,7 @@ final class ProductPropertiesBuilder extends AbstractBuilder
                 $document->set('code', $product->getCode());
                 $document->set('createdAt', $product->getCreatedAt()->format(\DATE_ATOM));
                 $document->set('position', $product->getPosition());
+                $document->set('enabled', $product->isEnabled());
 
                 $stock = 0;
                 /** @var ProductVariant $variant */
