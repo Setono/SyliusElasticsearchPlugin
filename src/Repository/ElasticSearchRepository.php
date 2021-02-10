@@ -55,6 +55,13 @@ final class ElasticSearchRepository
         return $this;
     }
 
+    public function whereEnabled(): self
+    {
+        $this->boolQuery->addMust(new Term(['enabled' => true]));
+
+        return $this;
+    }
+
     public function whereStock(): self
     {
         $this->boolQuery->addMust(new Range('stock', [
