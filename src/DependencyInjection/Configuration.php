@@ -39,10 +39,7 @@ class Configuration implements ConfigurationInterface
                     ->min(1)
                     ->defaultValue(100)
                 ->end()
-                ->booleanNode('enable_product_variant_listener')
-                    ->defaultValue(true)
-                ->end()
-                ->booleanNode('enable_product_taxon_listener')
+                ->booleanNode('enable_listeners')
                     ->defaultValue(true)
                 ->end()
             ->end();

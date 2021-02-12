@@ -20,8 +20,7 @@ class SetonoSyliusElasticsearchExtension extends Extension
         $container->setParameter('setono_sylius_elasticsearch.index_configs', $config['index_configs']);
         $container->setParameter('setono_sylius_elasticsearch.pagination', $config['pagination']);
         $container->setParameter('setono_sylius_elasticsearch.max_filter_options', $config['max_filter_options']);
-        $container->setParameter('setono_sylius_elasticsearch.enable_product_variant_listener', $config['enable_product_variant_listener']);
-        $container->setParameter('setono_sylius_elasticsearch.enable_product_taxon_listener', $config['enable_product_taxon_listener']);
+        $container->setParameter('setono_sylius_elasticsearch.enable_listeners', $config['enable_listeners']);
 
         foreach ($config['index_configs'] as $indexName => $indexConfigs) {
             $listenerId = sprintf(
