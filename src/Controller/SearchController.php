@@ -256,11 +256,6 @@ class SearchController extends Controller
         $sortField = $request->get('sort_field');
         $sortDirection = $request->get('sort_direction');
 
-        if (null === $sortField && $taxon->getCode() === 'nyheder') {
-            $sortField = 'createdAt';
-            $sortDirection = 'desc';
-        }
-
         switch ($sortField) {
             case 'createdAt':
                 $this->elasticSearchTaxonRepository->sortByCreated($sortDirection);
