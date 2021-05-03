@@ -14,7 +14,7 @@ use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
 use Pagerfanta\Pagerfanta;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Setono\SyliusElasticsearchPlugin\Event\ProductIndexEvent;
-use Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository;
+use Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepositoryInterface;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 use Sylius\Bundle\TaxonomyBundle\Doctrine\ORM\TaxonRepository;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
@@ -52,7 +52,7 @@ class SearchController extends Controller
     /** @var ChannelContextInterface */
     private $channelContext;
 
-    /** @var ElasticSearchRepository */
+    /** @var ElasticSearchRepositoryInterface */
     private $elasticSearchTaxonRepository;
 
     /** @var EventDispatcherInterface */
@@ -69,7 +69,7 @@ class SearchController extends Controller
         PaginatedFinderInterface $taxonFinder,
         LocaleContextInterface $localeContext,
         ChannelContextInterface $channelContext,
-        ElasticSearchRepository $elasticSearchTaxonRepository,
+        ElasticSearchRepositoryInterface $elasticSearchTaxonRepository,
         EventDispatcherInterface $eventDispatcher,
         int $pagination
     ) {
