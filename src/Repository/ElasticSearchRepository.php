@@ -20,7 +20,7 @@ use Elastica\Query\Terms;
 use Sylius\Component\Channel\Model\ChannelInterface;
 use Sylius\Component\Core\Model\TaxonInterface;
 
-final class ElasticSearchRepository
+final class ElasticSearchRepository implements ElasticSearchRepositoryInterface
 {
     /** @var BoolQuery */
     private $boolQuery;
@@ -28,7 +28,7 @@ final class ElasticSearchRepository
     /** @var array */
     private $sort = [];
 
-    /** @var TaxonInterface */
+    /** @var int */
     private $currentTaxonId = 0;
 
     private $maxFilterOptions;
@@ -40,14 +40,14 @@ final class ElasticSearchRepository
         $this->maxFilterOptions = $maxFilterOptions;
     }
 
-    public function whereChannel(ChannelInterface $channel): self
+    public function whereChannel(ChannelInterface $channel): ElasticSearchRepositoryInterface
     {
         $this->boolQuery->addMust(new Term(['channels' => ['value' => $channel->getCode()]]));
 
         return $this;
     }
 
-    public function whereTaxon(TaxonInterface $taxon): self
+    public function whereTaxon(TaxonInterface $taxon): ElasticSearchRepositoryInterface
     {
         $this->currentTaxonId = $taxon->getId();
         $this->boolQuery->addMust(new Term(['taxons' => ['value' => $taxon->getId()]]));
@@ -55,14 +55,14 @@ final class ElasticSearchRepository
         return $this;
     }
 
-    public function whereEnabled(): self
+    public function whereEnabled(): ElasticSearchRepositoryInterface
     {
         $this->boolQuery->addMust(new Term(['enabled' => true]));
 
         return $this;
     }
 
-    public function whereStock(): self
+    public function whereStock(): ElasticSearchRepositoryInterface
     {
         $this->boolQuery->addMust(new Range('stock', [
             'gte' => 1,
@@ -71,7 +71,7 @@ final class ElasticSearchRepository
         return $this;
     }
 
-    public function whereBrands(array $brandCodes): self
+    public function whereBrands(array $brandCodes): ElasticSearchRepositoryInterface
     {
         $boolQuery = new BoolQuery();
         $boolQuery->addMust(new Terms('brand.code', $brandCodes));
@@ -84,7 +84,7 @@ final class ElasticSearchRepository
         return $this;
     }
 
-    public function whereOptions(array $options): self
+    public function whereOptions(array $options): ElasticSearchRepositoryInterface
     {
         foreach ($options as $optionCode => $values) {
             if (!is_array($values)) {
@@ -115,7 +115,7 @@ final class ElasticSearchRepository
         return $this;
     }
 
-    public function whereAttributes(array $attributes, string $localeCode): self
+    public function whereAttributes(array $attributes, string $localeCode): ElasticSearchRepositoryInterface
     {
         foreach ($attributes as $attributesCode => $values) {
             if (!is_array($values)) {
@@ -142,7 +142,7 @@ final class ElasticSearchRepository
         return $this;
     }
 
-    public function whereChannelPrice(int $gte, int $lte, ChannelInterface $channel): self
+    public function whereChannelPrice(int $gte, int $lte, ChannelInterface $channel): ElasticSearchRepositoryInterface
     {
         $boolQuery = new BoolQuery();
         $boolQuery->addMust(new Match('prices.channel', $channel->getCode()));
