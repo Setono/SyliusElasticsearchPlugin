@@ -6,6 +6,7 @@ namespace Setono\SyliusElasticsearchPlugin\EventListener;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMInvalidArgumentException;
+use Elastica\Exception\ResponseException;
 use FOS\ElasticaBundle\Persister\ObjectPersisterInterface;
 use Sylius\Bundle\ResourceBundle\Event\ResourceControllerEvent;
 use Sylius\Component\Core\Model\ProductInterface;
@@ -95,6 +96,16 @@ class ProductListener
         $product = $event->getSubject();
         Assert::isInstanceOf($product, ProductInterface::class);
 
-        $this->persister->deleteOne($product);
+        // Do not delete products that have no ID since they do not exist in ES
+        if (null === $product->getId()) {
+            return;
+        }
+
+        try {
+            $this->persister->deleteOne($product);
+        } catch (ResponseException $exception) {
+            // Errors can occur during deletion if event is thrown or listener is read multiple times.
+            // Just ignore this kind of exception
+        }
     }
 }
