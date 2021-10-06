@@ -174,9 +174,16 @@ class SearchController extends Controller
         }
 
         if ($request->isXmlHttpRequest()) {
-            return $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
+            $response = $this->render('@SetonoSyliusElasticsearchPlugin/results.html.twig', [
                 'results' => $this->getResults($request, $taxon),
             ]);
+
+            $response->headers->addCacheControlDirective('no-cache', true);
+            $response->headers->addCacheControlDirective('max-age', 0);
+            $response->headers->addCacheControlDirective('must-revalidate', true);
+            $response->headers->addCacheControlDirective('no-store', true);
+
+            return $response;
         }
 
         $filtersPaginator = $this->productFinder->findPaginated($this->elasticSearchTaxonRepository->getAvailableFilters($this->channelContext->getChannel(), $this->localeContext->getLocaleCode(), $taxon));
