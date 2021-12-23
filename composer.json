@@ -9,7 +9,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.3",
+        "php": ">=7.3",
         "friendsofsymfony/elastica-bundle": "^5.1",
         "psr/event-dispatcher": "^1.0",
         "sylius/core-bundle": "^1.7",
