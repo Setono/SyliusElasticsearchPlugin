@@ -12,7 +12,7 @@ use Elastica\Aggregation\Terms as AggregationTerms;
 use Elastica\Aggregation\TopHits as AggregationTopHits;
 use Elastica\Query;
 use Elastica\Query\BoolQuery;
-use Elastica\Query\Match;
+use Elastica\Query\MatchQuery;
 use Elastica\Query\Nested;
 use Elastica\Query\Range;
 use Elastica\Query\Term;
@@ -92,7 +92,7 @@ final class ElasticSearchRepository
             }
 
             $optionBoolQuery = new BoolQuery();
-            $optionBoolQuery->addMust(new Match('options.code', $optionCode));
+            $optionBoolQuery->addMust(new MatchQuery('options.code', $optionCode));
 
             // Selected option needs to be in stock
             $optionBoolQuery->addMust(new Range('options.onHand', [
@@ -123,8 +123,8 @@ final class ElasticSearchRepository
             }
 
             $optionBoolQuery = new BoolQuery();
-            $optionBoolQuery->addMust(new Match('attributes.code', $attributesCode));
-            $optionBoolQuery->addMust(new Match('attributes.locale', $localeCode));
+            $optionBoolQuery->addMust(new MatchQuery('attributes.code', $attributesCode));
+            $optionBoolQuery->addMust(new MatchQuery('attributes.locale', $localeCode));
 
             $valueBoolQuery = new BoolQuery();
             $valueBoolQuery->addMust(new Terms('attributes.values.code', $values));
@@ -145,7 +145,7 @@ final class ElasticSearchRepository
     public function whereChannelPrice(int $gte, int $lte, ChannelInterface $channel): self
     {
         $boolQuery = new BoolQuery();
-        $boolQuery->addMust(new Match('prices.channel', $channel->getCode()));
+        $boolQuery->addMust(new MatchQuery('prices.channel', $channel->getCode()));
         $boolQuery->addMust(new Range('prices.price', [
             'gte' => $gte,
             'lte' => $lte,
@@ -232,7 +232,7 @@ final class ElasticSearchRepository
         $priceMinAggregation->setField('prices.price');
         $priceMaxAggregation = new AggregationMax('max');
         $priceMaxAggregation->setField('prices.price');
-        $priceChannelAggregation = new AggregationFilter('channel', new Match('prices.channel', $channel->getCode()));
+        $priceChannelAggregation = new AggregationFilter('channel', new MatchQuery('prices.channel', $channel->getCode()));
         $priceChannelAggregation->addAggregation($priceMinAggregation);
         $priceChannelAggregation->addAggregation($priceMaxAggregation);
         $priceAggregations = new AggregationNested('prices', 'prices');
@@ -246,7 +246,7 @@ final class ElasticSearchRepository
         $optionsValueCodeAggregation->setField('options.value.code');
         $optionsValueCodeAggregation->setSize($this->maxFilterOptions);
         $optionsValueCodeAggregation->addAggregation($optionsValueHitsAggregation);
-        $optionsValueLocaleAggregation = new AggregationFilter('locale', new Match('options.value.locale', $localeCode));
+        $optionsValueLocaleAggregation = new AggregationFilter('locale', new MatchQuery('options.value.locale', $localeCode));
         $optionsValueLocaleAggregation->addAggregation($optionsValueCodeAggregation);
         $optionsValueAggregation = new AggregationNested('value', 'options.value');
         $optionsValueAggregation->addAggregation($optionsValueLocaleAggregation);
@@ -264,7 +264,7 @@ final class ElasticSearchRepository
         $attributesValueCodeAggregation->setField('attributes.values.code');
         $attributesValueCodeAggregation->setSize($this->maxFilterOptions);
         $attributesValueCodeAggregation->addAggregation($attributesValueHitsAggregation);
-        $attributesValueLocaleAggregation = new AggregationFilter('locale', new Match('attributes.values.locale', $localeCode));
+        $attributesValueLocaleAggregation = new AggregationFilter('locale', new MatchQuery('attributes.values.locale', $localeCode));
         $attributesValueLocaleAggregation->addAggregation($attributesValueCodeAggregation);
         $attributesValueAggregation = new AggregationNested('value', 'attributes.values');
         $attributesValueAggregation->addAggregation($attributesValueLocaleAggregation);
