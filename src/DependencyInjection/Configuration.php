@@ -11,8 +11,13 @@ class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('setono_sylius_elasticsearch');
+        if (method_exists(TreeBuilder::class, 'getRootNode')) {
+            $treeBuilder = new TreeBuilder('setono_sylius_elasticsearch');
+            $rootNode = $treeBuilder->getRootNode();
+        } else {
+            $treeBuilder = new TreeBuilder();
+            $rootNode = $treeBuilder->root('setono_sylius_elasticsearch');
+        }
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()
