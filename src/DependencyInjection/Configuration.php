@@ -11,8 +11,9 @@ class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('setono_sylius_elasticsearch');
+        $treeBuilder = new TreeBuilder('setono_sylius_elasticsearch');
+        $rootNode = $treeBuilder->getRootNode();
+
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()

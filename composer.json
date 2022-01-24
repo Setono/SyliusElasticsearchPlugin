@@ -9,7 +9,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": ">=7.3",
+        "php": ">=7.4",
         "friendsofsymfony/elastica-bundle": "^5.1",
         "psr/event-dispatcher": "^1.0",
         "sylius/core-bundle": "^1.7",
@@ -23,7 +23,13 @@
         "setono/code-quality-pack": "^1.5"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "ergebnis/composer-normalize": true,
+            "dealerdirect/phpcodesniffer-composer-installer": false,
+            "symfony/thanks": true
+        }
     },
     "extra": {
         "branch-alias": {

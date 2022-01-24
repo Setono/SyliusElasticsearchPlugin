@@ -7,7 +7,7 @@ namespace Setono\SyliusElasticsearchPlugin\Controller;
 use Elastica\Exception\ResponseException;
 use Elastica\Query;
 use Elastica\Query\BoolQuery;
-use Elastica\Query\Match;
+use Elastica\Query\MatchQuery;
 use Elastica\Query\Nested;
 use Elastica\Query\QueryString;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
@@ -111,7 +111,7 @@ class SearchController extends Controller
             $queryStringDescriptionObject->setBoost(0.1);
             $translationOr->addShould($queryStringDescriptionObject);
 
-            $localeMatch = new Match('translations.locale', $this->localeContext->getLocaleCode());
+            $localeMatch = new MatchQuery('translations.locale', $this->localeContext->getLocaleCode());
             $translationBool = new BoolQuery();
             $translationBool->addMust($localeMatch);
             $translationBool->addMust($translationOr);

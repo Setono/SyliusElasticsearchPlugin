@@ -90,10 +90,6 @@ services:
     tags:
       - { name: kernel.event_subscriber }
 
-  setono_sylius_elasticsearch_plugin.command.generate_config:
-    class: Setono\SyliusElasticsearchPlugin\Command\SyncElasticCommand
-    tags: [console.command]
-
   setono_sylius_elasticsearch_plugin.listener.product_variant_listener:
     class: Setono\SyliusElasticsearchPlugin\EventListener\ProductVariantListener
     arguments:
