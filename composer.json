@@ -20,7 +20,7 @@
     "require-dev": {
         "loevgaard/sylius-brand-plugin": "^2.1",
         "roave/security-advisories": "dev-master",
-        "setono/code-quality-pack": "^1.5"
+        "setono/code-quality-pack": "^1.5 || ^2.0"
     },
     "config": {
         "sort-packages": true,
