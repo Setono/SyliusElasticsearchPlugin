@@ -10,7 +10,7 @@
     "license": "MIT",
     "require": {
         "php": ">=7.4",
-        "friendsofsymfony/elastica-bundle": "^5.1",
+        "friendsofsymfony/elastica-bundle": "^5.1 || ^6.0",
         "psr/event-dispatcher": "^1.0",
         "sylius/core-bundle": "^1.7",
         "symfony/config": "^4.4 || ^5.0",
