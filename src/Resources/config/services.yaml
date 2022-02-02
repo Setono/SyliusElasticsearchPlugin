@@ -21,6 +21,10 @@ services:
       - "@setono_sylius_elasticsearch_plugin.repository.elastic_search"
       - "@event_dispatcher"
       - "%setono_sylius_elasticsearch.pagination%"
+    calls:
+      - { method: 'setContainer', arguments: ['@service_container'] }
+    tags:
+      - { name: controller.service_arguments }
 
   setono_sylius_elasticsearch_plugin.property_builder.product_properties:
     class: Setono\SyliusElasticsearchPlugin\PropertyBuilder\ProductPropertiesBuilder

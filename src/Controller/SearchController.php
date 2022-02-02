@@ -24,12 +24,12 @@ use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Sylius\Component\Product\Model\ProductAttributeInterface;
 use Sylius\Component\Product\Model\ProductOptionInterface;
 use Sylius\Component\Product\Repository\ProductOptionRepositoryInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class SearchController extends Controller
+class SearchController extends AbstractController
 {
     /** @var TaxonRepository */
     private $taxonRepository;
