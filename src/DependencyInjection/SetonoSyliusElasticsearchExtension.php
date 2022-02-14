@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\DependencyInjection;
 
+use Symfony\Component\DependencyInjection\Reference;
 use function Safe\sprintf;
 use Setono\SyliusElasticsearchPlugin\Doctrine\ObjectChangeListener;
 use Symfony\Component\Config\FileLocator;
@@ -33,8 +34,9 @@ class SetonoSyliusElasticsearchExtension extends Extension
             $container->register($listenerId, ObjectChangeListener::class)
                 ->setPublic(true)
                 ->addArgument($indexConfigs)
-                ->addArgument('@fos_elastica.persister_registry')
-                ->addArgument('@fos_elastica.indexable');
+                ->addArgument(new Reference('fos_elastica.persister_registry'))
+                ->addArgument(new Reference('fos_elastica.indexable'))
+            ;
         }
 
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
