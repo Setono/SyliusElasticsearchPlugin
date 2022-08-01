@@ -20,6 +20,7 @@ jobs:
             matrix:
                 php-version:
                     - "7.4"
+                    - "8.0"
 
                 dependencies:
                     - "highest"
@@ -40,7 +41,7 @@ jobs:
                 uses: "ramsey/composer-install@v1"
                 with:
                     dependency-versions: "${{ matrix.dependencies }}"
-            
+
             -   name: "Validate composer"
                 run: "composer validate --strict"
 
@@ -59,6 +60,7 @@ jobs:
             matrix:
                 php-version:
                     - "7.4"
+                    - "8.0"
 
                 dependencies:
                     - "highest"
@@ -74,7 +76,7 @@ jobs:
                     extensions: "${{ env.PHP_EXTENSIONS }}"
                     php-version: "${{ matrix.php-version }}"
                     tools: "composer:v1, composer-require-checker, composer-unused"
-                    
+
             -   name: "Install composer dependencies"
                 uses: "ramsey/composer-install@v1"
                 with:
@@ -82,10 +84,10 @@ jobs:
 
             -   name: "Run maglnet/composer-require-checker"
                 run: "composer-require-checker check --config-file=$(pwd)/composer-require-checker.json"
-                
+
             -   name: "Run composer-unused/composer-unused"
                 run: "composer-unused"
-    
+
     static-code-analysis:
         name: "Static Code Analysis"
 
@@ -95,6 +97,7 @@ jobs:
             matrix:
                 php-version:
                     - "7.4"
+                    - "8.0"
 
                 dependencies:
                     - "highest"

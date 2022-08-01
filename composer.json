@@ -1,16 +1,16 @@
 {
     "name": "setono/sylius-elasticsearch-plugin",
-    "type": "sylius-plugin",
     "description": "Elasticsearch plugin for Sylius",
+    "license": "MIT",
+    "type": "sylius-plugin",
     "keywords": [
         "sylius",
         "elasticsearch",
         "search"
     ],
-    "license": "MIT",
     "require": {
-        "php": ">=7.4",
-        "friendsofsymfony/elastica-bundle": "^5.1",
+        "php": ">=7.4 || >= 8.0",
+        "friendsofsymfony/elastica-bundle": "^6.1",
         "psr/event-dispatcher": "^1.0",
         "sylius/core-bundle": "^1.7",
         "symfony/config": "^4.4 || ^5.0",
@@ -22,26 +22,27 @@
         "roave/security-advisories": "dev-master",
         "setono/code-quality-pack": "^1.5"
     },
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Setono\\SyliusElasticsearchPlugin\\": "src/"
+        }
+    },
     "config": {
-        "sort-packages": true,
         "allow-plugins": {
             "phpstan/extension-installer": true,
             "ergebnis/composer-normalize": true,
             "dealerdirect/phpcodesniffer-composer-installer": false,
-            "symfony/thanks": true
-        }
+            "symfony/thanks": true,
+            "composer/package-versions-deprecated": true
+        },
+        "sort-packages": true
     },
     "extra": {
         "branch-alias": {
             "dev-master": "1.0-dev"
         }
     },
-    "autoload": {
-        "psr-4": {
-            "Setono\\SyliusElasticsearchPlugin\\": "src/"
-        }
-    },
-    "prefer-stable": true,
     "scripts": {
         "analyse": "phpstan analyse",
         "check-style": "ecs check src/",

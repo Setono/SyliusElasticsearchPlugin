@@ -9,7 +9,7 @@ use FOS\ElasticaBundle\Transformer\ModelToElasticaAutoTransformer;
 
 class ProductTransformer extends ModelToElasticaAutoTransformer
 {
-    public function transform($object, array $fields): Document
+    public function transform(object $object, array $fields): Document
     {
         $identifier = $this->propertyAccessor->getValue($object, $this->options['identifier']);
         if ($identifier && !is_scalar($identifier)) {

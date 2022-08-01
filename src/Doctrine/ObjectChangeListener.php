@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Setono\SyliusElasticsearchPlugin\Doctrine;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use FOS\ElasticaBundle\Persister\PersisterRegistry;
 use FOS\ElasticaBundle\Provider\IndexableInterface;
@@ -91,9 +91,8 @@ class ObjectChangeListener implements EventSubscriber
     private function sendProductUpdateEvent($eventName, $args): void
     {
         $index = $this->options['index_name'];
-        $type = $this->options['type_name'];
         $object = $this->getParentModel($args->getObject());
-        $persister = $this->persisterRegistry->getPersister($index, $type);
+        $persister = $this->persisterRegistry->getPersister($index);
         switch ($eventName) {
             case Events::postUpdate:
                 if (!$object->isEnabled()) {
@@ -103,7 +102,7 @@ class ObjectChangeListener implements EventSubscriber
                 }
 
                 if ($persister->handlesObject($object)) {
-                    if ($this->indexable->isObjectIndexable($index, $type, $object)) {
+                    if ($this->indexable->isObjectIndexable($index, $object)) {
                         $persister->replaceOne($object);
                     } else {
                         $persister->deleteOne($object);
@@ -112,7 +111,7 @@ class ObjectChangeListener implements EventSubscriber
 
                 break;
             case Events::postPersist:
-                if ($persister->handlesObject($object) && $this->indexable->isObjectIndexable($index, $type, $object)) {
+                if ($persister->handlesObject($object) && $this->indexable->isObjectIndexable($index, $object)) {
                     $persister->insertOne($object);
                 }
 

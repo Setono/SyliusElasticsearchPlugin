@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 
-use FOS\ElasticaBundle\Event\TransformEvent;
+use FOS\ElasticaBundle\Event\PreTransformEvent;
 use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 
@@ -36,7 +36,7 @@ abstract class AbstractBuilder implements PropertyBuilderInterface
     /**
      * {@inheritdoc}
      */
-    public function buildProperty(TransformEvent $event, string $supportedModelClass, callable $callback): void
+    public function buildProperty(PreTransformEvent $event, string $supportedModelClass, callable $callback): void
     {
         $model = $event->getObject();
 
@@ -55,7 +55,7 @@ abstract class AbstractBuilder implements PropertyBuilderInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            TransformEvent::PRE_TRANSFORM => 'consumeEvent',
+            PreTransformEvent::class => 'consumeEvent',
         ];
     }
 }

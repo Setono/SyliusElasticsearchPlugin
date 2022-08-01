@@ -18,6 +18,7 @@ use Setono\SyliusElasticsearchPlugin\Repository\ElasticSearchRepository;
 use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 use Sylius\Bundle\TaxonomyBundle\Doctrine\ORM\TaxonRepository;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
+use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\Taxon;
 use Sylius\Component\Core\Model\TaxonInterface;
 use Sylius\Component\Locale\Context\LocaleContextInterface;
@@ -179,7 +180,7 @@ class SearchController extends AbstractController
             ]);
 
             $response->headers->addCacheControlDirective('no-cache', true);
-            $response->headers->addCacheControlDirective('max-age', 0);
+            $response->headers->addCacheControlDirective('max-age', '0');
             $response->headers->addCacheControlDirective('must-revalidate', true);
             $response->headers->addCacheControlDirective('no-store', true);
 
@@ -231,6 +232,9 @@ class SearchController extends AbstractController
         ]);
     }
 
+    /**
+     * @return Pagerfanta<ProductInterface>
+     */
     public function getResults(Request $request, TaxonInterface $taxon): Pagerfanta
     {
         $this->elasticSearchTaxonRepository
@@ -287,6 +291,8 @@ class SearchController extends AbstractController
 
     /**
      * Perform a product search using the index defined for the active locale.
+     *
+     * @return Pagerfanta<ProductInterface>|null
      */
     private function search(Request $request, string $queryString = ''): ?Pagerfanta
     {
@@ -320,6 +326,9 @@ class SearchController extends AbstractController
         return $paginator;
     }
 
+    /**
+     * @return Pagerfanta<ProductInterface>
+     */
     private function paginateProducts(Request $request, Query $query): Pagerfanta
     {
         $paginator = $this->productFinder->findPaginated($query);
