@@ -6,19 +6,14 @@ namespace Setono\SyliusElasticsearchPlugin\EventListener;
 
 use FOS\ElasticaBundle\Persister\ObjectPersisterInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
+use Webmozart\Assert\Assert;
 
 class ProductVariantListener
 {
-    /** @var ObjectPersisterInterface */
-    private $persister;
-
-    /** @var bool */
-    private $enabled;
-
-    public function __construct(ObjectPersisterInterface $persister, bool $enabled)
-    {
-        $this->persister = $persister;
-        $this->enabled = $enabled;
+    public function __construct(
+        private  readonly ObjectPersisterInterface $persister,
+        private readonly bool $enabled,
+    ) {
     }
 
     public function postUpdate(ProductVariantInterface $variant): void
@@ -28,6 +23,8 @@ class ProductVariantListener
         }
 
         $product = $variant->getProduct();
+        Assert::notNull($product);
+
         foreach ($product->getVariants() as $child) {
             /** @var ProductVariantInterface $child */
             if ($child->getOnHand() > 0) {

@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Setono\SyliusElasticsearchPlugin\Repository;
 
 use Doctrine\ORM\Query;
+use Sylius\Bundle\ResourceBundle\Doctrine\ORM\EntityRepository;
 use Sylius\Component\Product\Model\ProductAttributeValueInterface;
 
+/**
+ * @mixin EntityRepository
+ */
 trait ProductAttributeValueRepositoryTrait
 {
     public function findValuesByAttributeCode(string $attributeCode, string $locale): ?ProductAttributeValueInterface
@@ -18,7 +22,8 @@ trait ProductAttributeValueRepositoryTrait
             ->andWhere('pa.code = :attributeCode')
             ->setParameter('attributeCode', $attributeCode)
             ->setParameter('locale', $locale)
-            ->getQuery();
+            ->getQuery()
+        ;
 
         return $query->getOneOrNullResult();
     }
