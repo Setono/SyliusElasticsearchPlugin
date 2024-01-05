@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 
 use Elastica\Document;
-use FOS\ElasticaBundle\Event\TransformEvent;
+use FOS\ElasticaBundle\Event\PreTransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Product\Model\ProductOptionTranslationInterface;
@@ -16,12 +16,15 @@ use Sylius\Component\Product\Model\ProductOptionValueTranslationInterface;
  */
 final class OptionBuilder extends AbstractBuilder
 {
-    public function consumeEvent(TransformEvent $event): void
+    public function consumeEvent(PreTransformEvent $event): void
     {
-        $this->buildProperty($event, ProductInterface::class,
+        $this->buildProperty(
+            $event,
+            ProductInterface::class,
             function (ProductInterface $product, Document $document): void {
                 $this->resolveProductOptions($product, $document);
-            });
+            },
+        );
     }
 
     private function resolveProductOptions(ProductInterface $product, Document $document): void
@@ -36,7 +39,7 @@ final class OptionBuilder extends AbstractBuilder
 
                 $translations = [];
                 /** @var ProductOptionTranslationInterface $translation */
-                foreach ($productOptionValue->getOption()->getTranslations() as $translation) {
+                foreach ($productOptionValue->getOption()?->getTranslations() ?? [] as $translation) {
                     $translations[] = [
                         'locale' => $translation->getLocale(),
                         'name' => $translation->getName(),
@@ -44,8 +47,8 @@ final class OptionBuilder extends AbstractBuilder
                 }
 
                 $option = [
-                    'id' => $productOptionValue->getOption()->getId(),
-                    'code' => $productOptionValue->getOption()->getCode(),
+                    'id' => $productOptionValue->getOption()?->getId(),
+                    'code' => $productOptionValue->getOption()?->getCode(),
                     'translations' => $translations,
                     'value' => [],
                     'onHand' => $productVariant->isTracked() ? (int) $productVariant->getOnHand() - (int) $productVariant->getOnHold() : 1,

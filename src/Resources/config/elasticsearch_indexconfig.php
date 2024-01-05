@@ -3,6 +3,8 @@
 declare(strict_types=1);
 /**
  * ElasticSearch index analysis settings
+ *
+ * @psalm-suppress UnusedVariable
  */
 $analysis = [
     'char_filter' => [
@@ -38,6 +40,8 @@ $analysis = [
 
 /**
  * Index settings for product models
+ *
+ * @psalm-suppress UnusedVariable
  */
 $productTypes = [
     'default' => [
@@ -88,6 +92,8 @@ $productTypes = [
 
 /**
  * Index settings for taxon models
+ *
+ * @psalm-suppress UnusedVariable
  */
 $taxonTypes = [
     'default' => [

@@ -5,33 +5,28 @@ declare(strict_types=1);
 namespace Setono\SyliusElasticsearchPlugin\Doctrine;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use FOS\ElasticaBundle\Persister\PersisterRegistry;
 use FOS\ElasticaBundle\Provider\IndexableInterface;
 use Sylius\Component\Core\Model\ProductTranslation;
 use Sylius\Component\Product\Model\ProductAttributeValue;
+use Sylius\Component\Resource\Model\ToggleableInterface;
+use Webmozart\Assert\Assert;
 
 class ObjectChangeListener implements EventSubscriber
 {
-    /** @var string */
-    private $modelClass;
+    private string $modelClass;
 
-    /** @var PersisterRegistry */
-    private $persisterRegistry;
-
-    /** @var IndexableInterface */
-    private $indexable;
-
-    /** @var array */
-    private $options;
-
-    public function __construct(array $options, PersisterRegistry $persisterRegistry, IndexableInterface $indexable)
-    {
-        $this->options = $options;
+    public function __construct(
+        /**
+         * @var array{ model_class: string, index_name: string } $options
+         */
+        private readonly array $options,
+        private readonly PersisterRegistry $persisterRegistry,
+        private readonly IndexableInterface $indexable,
+    ) {
         $this->modelClass = $options['model_class'];
-        $this->persisterRegistry = $persisterRegistry;
-        $this->indexable = $indexable;
     }
 
     public function postUpdate(LifecycleEventArgs $args): void
@@ -64,12 +59,7 @@ class ObjectChangeListener implements EventSubscriber
         ];
     }
 
-    /**
-     * @param object $object
-     *
-     * @return object
-     */
-    private function getParentModel($object)
+    private function getParentModel(object $object): ?object
     {
         if ($object instanceof $this->modelClass) {
             return $object;
@@ -84,26 +74,23 @@ class ObjectChangeListener implements EventSubscriber
         return $object;
     }
 
-    /**
-     * @param string             $eventName
-     * @param LifecycleEventArgs $args
-     */
-    private function sendProductUpdateEvent($eventName, $args): void
+    private function sendProductUpdateEvent(string $eventName, LifecycleEventArgs $args): void
     {
         $index = $this->options['index_name'];
-        $type = $this->options['type_name'];
         $object = $this->getParentModel($args->getObject());
-        $persister = $this->persisterRegistry->getPersister($index, $type);
+        Assert::notNull($object);
+
+        $persister = $this->persisterRegistry->getPersister($index);
         switch ($eventName) {
             case Events::postUpdate:
-                if (!$object->isEnabled()) {
+                if ($object instanceof ToggleableInterface && !$object->isEnabled()) {
                     $persister->deleteOne($object);
 
                     break;
                 }
 
                 if ($persister->handlesObject($object)) {
-                    if ($this->indexable->isObjectIndexable($index, $type, $object)) {
+                    if ($this->indexable->isObjectIndexable($index, $object)) {
                         $persister->replaceOne($object);
                     } else {
                         $persister->deleteOne($object);
@@ -112,7 +99,7 @@ class ObjectChangeListener implements EventSubscriber
 
                 break;
             case Events::postPersist:
-                if ($persister->handlesObject($object) && $this->indexable->isObjectIndexable($index, $type, $object)) {
+                if ($persister->handlesObject($object) && $this->indexable->isObjectIndexable($index, $object)) {
                     $persister->insertOne($object);
                 }
 

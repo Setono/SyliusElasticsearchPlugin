@@ -7,12 +7,15 @@ namespace Setono\SyliusElasticsearchPlugin\Transformer;
 use Elastica\Document;
 use FOS\ElasticaBundle\Transformer\ModelToElasticaAutoTransformer;
 
+/** @psalm-suppress PropertyNotSetInConstructor */
 class ProductTransformer extends ModelToElasticaAutoTransformer
 {
-    public function transform($object, array $fields): Document
+    public function transform(object $object, array $fields): Document
     {
+        /** @var mixed $identifier */
         $identifier = $this->propertyAccessor->getValue($object, $this->options['identifier']);
-        if ($identifier && !is_scalar($identifier)) {
+
+        if (!is_string($identifier)) {
             $identifier = (string) $identifier;
         }
 

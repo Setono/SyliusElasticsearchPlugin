@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\Reference;
-use function Safe\sprintf;
 use Setono\SyliusElasticsearchPlugin\Doctrine\ObjectChangeListener;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class SetonoSyliusElasticsearchExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $config = $this->processConfiguration(new Configuration(), $configs);
+        /**
+         * @psalm-suppress PossiblyNullArgument
+         *
+         * @var array{index_configs: array<string, array{type_name: string}>, pagination: int, max_filter_options: int, enable_product_variant_listener: bool, enable_product_taxon_listener: bool} $config
+         */
+        $config = $this->processConfiguration($this->getConfiguration([], $container), $configs);
 
         $container->setParameter('setono_sylius_elasticsearch.index_configs', $config['index_configs']);
         $container->setParameter('setono_sylius_elasticsearch.pagination', $config['pagination']);
@@ -28,7 +32,7 @@ class SetonoSyliusElasticsearchExtension extends Extension
             $listenerId = sprintf(
                 'elastic_search.object_change_listener.%s.%s',
                 $indexName,
-                $indexConfigs['type_name']
+                $indexConfigs['type_name'],
             );
 
             $container->register($listenerId, ObjectChangeListener::class)

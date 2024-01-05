@@ -19,19 +19,15 @@ use Elastica\Query\Term;
 use Elastica\Query\Terms;
 use Sylius\Component\Channel\Model\ChannelInterface;
 use Sylius\Component\Core\Model\TaxonInterface;
+use Webmozart\Assert\Assert;
 
 final class ElasticSearchRepository
 {
-    /** @var BoolQuery */
-    private $boolQuery;
+    private BoolQuery $boolQuery;
 
-    /** @var array */
-    private $sort = [];
+    private array $sort = [];
 
-    /** @var TaxonInterface */
-    private $currentTaxonId = 0;
-
-    private $maxFilterOptions;
+    private int $maxFilterOptions;
 
     public function __construct(int $maxFilterOptions)
     {
@@ -49,7 +45,6 @@ final class ElasticSearchRepository
 
     public function whereTaxon(TaxonInterface $taxon): self
     {
-        $this->currentTaxonId = $taxon->getId();
         $this->boolQuery->addMust(new Term(['taxons' => ['value' => $taxon->getId()]]));
 
         return $this;
@@ -71,6 +66,9 @@ final class ElasticSearchRepository
         return $this;
     }
 
+    /**
+     * @param list<string> $brandCodes
+     */
     public function whereBrands(array $brandCodes): self
     {
         $boolQuery = new BoolQuery();
@@ -87,9 +85,10 @@ final class ElasticSearchRepository
     public function whereOptions(array $options): self
     {
         foreach ($options as $optionCode => $values) {
-            if (!is_array($values)) {
+            if (!is_array($values) || !array_is_list($values)) {
                 continue;
             }
+            Assert::allScalar($values);
 
             $optionBoolQuery = new BoolQuery();
             $optionBoolQuery->addMust(new MatchQuery('options.code', $optionCode));
@@ -118,9 +117,10 @@ final class ElasticSearchRepository
     public function whereAttributes(array $attributes, string $localeCode): self
     {
         foreach ($attributes as $attributesCode => $values) {
-            if (!is_array($values)) {
+            if (!is_array($values) || !array_is_list($values)) {
                 continue;
             }
+            Assert::allScalar($values);
 
             $optionBoolQuery = new BoolQuery();
             $optionBoolQuery->addMust(new MatchQuery('attributes.code', $attributesCode));
@@ -232,7 +232,10 @@ final class ElasticSearchRepository
         $priceMinAggregation->setField('prices.price');
         $priceMaxAggregation = new AggregationMax('max');
         $priceMaxAggregation->setField('prices.price');
-        $priceChannelAggregation = new AggregationFilter('channel', new MatchQuery('prices.channel', $channel->getCode()));
+        $priceChannelAggregation = new AggregationFilter(
+            'channel',
+            new MatchQuery('prices.channel', $channel->getCode()),
+        );
         $priceChannelAggregation->addAggregation($priceMinAggregation);
         $priceChannelAggregation->addAggregation($priceMaxAggregation);
         $priceAggregations = new AggregationNested('prices', 'prices');
@@ -246,7 +249,10 @@ final class ElasticSearchRepository
         $optionsValueCodeAggregation->setField('options.value.code');
         $optionsValueCodeAggregation->setSize($this->maxFilterOptions);
         $optionsValueCodeAggregation->addAggregation($optionsValueHitsAggregation);
-        $optionsValueLocaleAggregation = new AggregationFilter('locale', new MatchQuery('options.value.locale', $localeCode));
+        $optionsValueLocaleAggregation = new AggregationFilter(
+            'locale',
+            new MatchQuery('options.value.locale', $localeCode),
+        );
         $optionsValueLocaleAggregation->addAggregation($optionsValueCodeAggregation);
         $optionsValueAggregation = new AggregationNested('value', 'options.value');
         $optionsValueAggregation->addAggregation($optionsValueLocaleAggregation);
@@ -259,12 +265,20 @@ final class ElasticSearchRepository
 
         $attributesValueHitsAggregation = new AggregationTopHits('value_hits');
         $attributesValueHitsAggregation->setSize(1);
-        $attributesValueHitsAggregation->setSource(['includes' => ['attributes.values.name', 'attributes.values.code']]);
+        $attributesValueHitsAggregation->setSource([
+            'includes' => [
+                'attributes.values.name',
+                'attributes.values.code',
+            ],
+        ]);
         $attributesValueCodeAggregation = new AggregationTerms('values_code');
         $attributesValueCodeAggregation->setField('attributes.values.code');
         $attributesValueCodeAggregation->setSize($this->maxFilterOptions);
         $attributesValueCodeAggregation->addAggregation($attributesValueHitsAggregation);
-        $attributesValueLocaleAggregation = new AggregationFilter('locale', new MatchQuery('attributes.values.locale', $localeCode));
+        $attributesValueLocaleAggregation = new AggregationFilter(
+            'locale',
+            new MatchQuery('attributes.values.locale', $localeCode),
+        );
         $attributesValueLocaleAggregation->addAggregation($attributesValueCodeAggregation);
         $attributesValueAggregation = new AggregationNested('value', 'attributes.values');
         $attributesValueAggregation->addAggregation($attributesValueLocaleAggregation);
@@ -286,7 +300,7 @@ final class ElasticSearchRepository
     public function getQuery(bool $resetQueue = true): Query
     {
         $query = new Query($this->boolQuery);
-        if (!empty($this->sort)) {
+        if ([] !== $this->sort) {
             $query->setSort($this->sort);
         }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Setono\SyliusElasticsearchPlugin\PropertyBuilder;
 
 use Elastica\Document;
-use FOS\ElasticaBundle\Event\TransformEvent;
+use FOS\ElasticaBundle\Event\PreTransformEvent;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 
@@ -14,12 +14,11 @@ use Sylius\Component\Core\Model\ProductVariantInterface;
  */
 final class ChannelPricingBuilder extends AbstractBuilder
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function consumeEvent(TransformEvent $event): void
+    public function consumeEvent(PreTransformEvent $event): void
     {
-        $this->buildProperty($event, ProductInterface::class,
+        $this->buildProperty(
+            $event,
+            ProductInterface::class,
             function (ProductInterface $product, Document $document): void {
                 if ($product->getVariants()->count() === 0) {
                     return;
@@ -38,6 +37,7 @@ final class ChannelPricingBuilder extends AbstractBuilder
                 }
 
                 $document->set('prices', $prices);
-            });
+            },
+        );
     }
 }

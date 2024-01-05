@@ -14,11 +14,12 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('setono_sylius_elasticsearch');
         $rootNode = $treeBuilder->getRootNode();
 
+        /** @psalm-suppress UndefinedMethod,PossiblyNullReference,MixedMethodCall */
         $rootNode
             ->addDefaultsIfNotSet()
             ->children()
                 ->arrayNode('index_configs')
-                    ->prototype('array')
+                    ->arrayPrototype()
                         ->addDefaultsIfNotSet()
                         ->children()
                             ->scalarNode('type_name')
@@ -45,8 +46,7 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->booleanNode('enable_product_taxon_listener')
                     ->defaultValue(true)
-                ->end()
-            ->end();
+        ;
 
         return $treeBuilder;
     }

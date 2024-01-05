@@ -10,14 +10,7 @@ use Sylius\Component\Core\Model\ProductVariantInterface;
 
 class Indexable extends FOSIndexable
 {
-    /**
-     * @param string $indexName
-     * @param string $typeName
-     * @param mixed  $object
-     *
-     * @return bool
-     */
-    public function isObjectIndexable($indexName, $typeName, $object)
+    public function isObjectIndexable(string $indexName, object $object): bool
     {
         // If object is product, we should count the onHand for all it's variant and mark the object as
         // indexable if any of the variants has a greater on-hand amount than 0
@@ -32,6 +25,6 @@ class Indexable extends FOSIndexable
             return false;
         }
 
-        return parent::isObjectIndexable($indexName, $typeName, $object);
+        return parent::isObjectIndexable($indexName, $object);
     }
 }

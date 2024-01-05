@@ -15,23 +15,11 @@ use Webmozart\Assert\Assert;
 
 class ProductListener
 {
-    /** @var ObjectPersisterInterface */
-    private $persister;
-
-    /** @var bool */
-    private $enabled;
-
-    /** @var EntityManagerInterface */
-    private $entityManager;
-
     public function __construct(
-        ObjectPersisterInterface $persister,
-        bool $enabled,
-        EntityManagerInterface $entityManager
+        private readonly ObjectPersisterInterface $persister,
+        private readonly bool $enabled,
+        private readonly EntityManagerInterface $entityManager,
     ) {
-        $this->persister = $persister;
-        $this->enabled = $enabled;
-        $this->entityManager = $entityManager;
     }
 
     public function handlePostCreate(ResourceControllerEvent $event): void

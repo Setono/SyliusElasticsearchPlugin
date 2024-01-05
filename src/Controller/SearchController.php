@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\Controller;
 
-use Elastica\Exception\ResponseException;
 use Elastica\Query;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\MatchQuery;
 use Elastica\Query\Nested;
 use Elastica\Query\QueryString;
 use FOS\ElasticaBundle\Finder\PaginatedFinderInterface;
+use FOS\ElasticaBundle\Paginator\FantaPaginatorAdapter;
+use Pagerfanta\Adapter\AdapterInterface;
 use Pagerfanta\Pagerfanta;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Setono\SyliusElasticsearchPlugin\Event\ProductIndexEvent;
@@ -28,61 +29,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Webmozart\Assert\Assert;
 
 class SearchController extends AbstractController
 {
-    /** @var TaxonRepository */
-    private $taxonRepository;
-
-    /** @var ProductOptionRepositoryInterface */
-    private $productOptionRepository;
-
-    /** @var EntityRepository */
-    private $productAttributeRepository;
-
-    /** @var PaginatedFinderInterface */
-    private $productFinder;
-
-    /** @var PaginatedFinderInterface */
-    private $taxonFinder;
-
-    /** @var LocaleContextInterface */
-    private $localeContext;
-
-    /** @var ChannelContextInterface */
-    private $channelContext;
-
-    /** @var ElasticSearchRepository */
-    private $elasticSearchTaxonRepository;
-
-    /** @var EventDispatcherInterface */
-    private $eventDispatcher;
-
-    /** @var int */
-    private $pagination;
-
     public function __construct(
-        TaxonRepository $taxonRepository,
-        ProductOptionRepositoryInterface $productOptionRepository,
-        EntityRepository $productAttributeRepository,
-        PaginatedFinderInterface $productFinder,
-        PaginatedFinderInterface $taxonFinder,
-        LocaleContextInterface $localeContext,
-        ChannelContextInterface $channelContext,
-        ElasticSearchRepository $elasticSearchTaxonRepository,
-        EventDispatcherInterface $eventDispatcher,
-        int $pagination
+        private readonly TaxonRepository $taxonRepository,
+        private readonly ProductOptionRepositoryInterface $productOptionRepository,
+        private readonly EntityRepository $productAttributeRepository,
+        private readonly PaginatedFinderInterface $productFinder,
+        private readonly PaginatedFinderInterface $taxonFinder,
+        private readonly LocaleContextInterface $localeContext,
+        private readonly ChannelContextInterface $channelContext,
+        private readonly ElasticSearchRepository $elasticSearchTaxonRepository,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly int $pagination,
     ) {
-        $this->taxonRepository = $taxonRepository;
-        $this->productOptionRepository = $productOptionRepository;
-        $this->productAttributeRepository = $productAttributeRepository;
-        $this->productFinder = $productFinder;
-        $this->taxonFinder = $taxonFinder;
-        $this->localeContext = $localeContext;
-        $this->channelContext = $channelContext;
-        $this->elasticSearchTaxonRepository = $elasticSearchTaxonRepository;
-        $this->eventDispatcher = $eventDispatcher;
-        $this->pagination = $pagination;
     }
 
     /**
@@ -92,8 +54,8 @@ class SearchController extends AbstractController
     {
         $products = $taxons = [];
         if ('' !== $queryString) {
-            $productLimit = $request->get('plimit', 10);
-            $taxonLimit = $request->get('tlimit', 5);
+            $productLimit = $request->query->getInt('plimit', 10);
+            $taxonLimit = $request->query->getInt('tlimit', 5);
 
             $translationsNested = new Nested();
             $translationsNested->setPath('translations');
@@ -123,7 +85,7 @@ class SearchController extends AbstractController
                     '_score' => [
                         'order' => 'desc',
                     ],
-                ]
+                ],
             );
 
             $products = $this->productFinder->find($queryObject, $productLimit);
@@ -170,7 +132,7 @@ class SearchController extends AbstractController
         /** @var TaxonInterface|null $taxon */
         $taxon = $this->taxonRepository->findOneBySlug($slug, $this->localeContext->getLocaleCode());
         if (null === $taxon) {
-            throw new NotFoundHttpException(\Safe\sprintf('The taxon with slug "%s" for locale "%s" does not exist', $slug, $this->localeContext->getLocaleCode()));
+            throw new NotFoundHttpException(sprintf('The taxon with slug "%s" for locale "%s" does not exist', $slug, $this->localeContext->getLocaleCode()));
         }
 
         if ($request->isXmlHttpRequest()) {
@@ -178,17 +140,22 @@ class SearchController extends AbstractController
                 'results' => $this->getResults($request, $taxon),
             ]);
 
-            $response->headers->addCacheControlDirective('no-cache', true);
-            $response->headers->addCacheControlDirective('max-age', 0);
-            $response->headers->addCacheControlDirective('must-revalidate', true);
-            $response->headers->addCacheControlDirective('no-store', true);
+            $response->headers->addCacheControlDirective('no-cache');
+            $response->headers->addCacheControlDirective('max-age', false);
+            $response->headers->addCacheControlDirective('must-revalidate');
+            $response->headers->addCacheControlDirective('no-store');
 
             return $response;
         }
 
         $filtersPaginator = $this->productFinder->findPaginated($this->elasticSearchTaxonRepository->getAvailableFilters($this->channelContext->getChannel(), $this->localeContext->getLocaleCode(), $taxon));
         $filtersPaginator->setMaxPerPage($this->pagination);
-        $filters = $filtersPaginator->getAdapter()->getAggregations();
+
+        /** @var FantaPaginatorAdapter|AdapterInterface $adapter */
+        $adapter = $filtersPaginator->getAdapter();
+        Assert::isInstanceOf($adapter, FantaPaginatorAdapter::class);
+
+        $filters = $adapter->getAggregations();
 
         $results = $this->getResults($request, $taxon);
         $resultsUrl = $request->getPathInfo();
@@ -197,14 +164,14 @@ class SearchController extends AbstractController
         $productOptionNameIndex = [];
         /** @var ProductOptionInterface $productOption */
         foreach ($this->productOptionRepository->findAll() as $productOption) {
-            $productOptionNameIndex[$productOption->getCode()] = $productOption->getTranslation()->getName();
+            $productOptionNameIndex[(string) $productOption->getCode()] = $productOption->getTranslation()->getName();
         }
 
         // Make product attribute name index
         $productAttributeNameIndex = [];
         /** @var ProductAttributeInterface $productAttribute */
         foreach ($this->productAttributeRepository->findAll() as $productAttribute) {
-            $productAttributeNameIndex[$productAttribute->getCode()] = $productAttribute->getName();
+            $productAttributeNameIndex[(string) $productAttribute->getCode()] = $productAttribute->getName();
         }
 
         $this->eventDispatcher->dispatch(new ProductIndexEvent($results, $taxon));
@@ -237,31 +204,33 @@ class SearchController extends AbstractController
             ->whereEnabled()
             ->whereChannel($this->channelContext->getChannel())
             ->whereTaxon($taxon)
-            ->whereStock();
+            ->whereStock()
+        ;
 
-        $brands = $request->get('brands');
-        if (is_array($brands)) {
+        /** @var list<string> $brands */
+        $brands = $request->query->all('brands');
+        if ([] !== $brands) {
             $this->elasticSearchTaxonRepository->whereBrands($brands);
         }
 
-        $options = $request->get('options');
-        if (is_array($options)) {
+        $options = $request->query->all('options');
+        if ([] !== $options) {
             $this->elasticSearchTaxonRepository->whereOptions($options);
         }
 
-        $attributes = $request->get('attributes');
-        if (is_array($attributes)) {
+        $attributes = $request->query->all('attributes');
+        if ([] !== $attributes) {
             $this->elasticSearchTaxonRepository->whereAttributes($attributes, $this->localeContext->getLocaleCode());
         }
 
-        $priceFrom = (int) $request->get('price_from', 0);
-        $priceTo = (int) $request->get('price_to', 0);
+        $priceFrom = $request->query->getInt('price_from');
+        $priceTo = $request->query->getInt('price_to');
         if ($priceFrom > 0 && $priceTo > 0 && $priceTo > $priceFrom) {
             $this->elasticSearchTaxonRepository->whereChannelPrice($priceFrom, $priceTo, $this->channelContext->getChannel());
         }
 
-        $sortField = $request->get('sort_field');
-        $sortDirection = $request->get('sort_direction');
+        $sortField = (string) $request->query->get('sort_field');
+        $sortDirection = $request->query->getAlnum('sort_direction');
 
         switch ($sortField) {
             case 'createdAt':
@@ -303,17 +272,17 @@ class SearchController extends AbstractController
                 '_score' => [
                     'order' => 'desc',
                 ],
-            ]
+            ],
         );
         $paginator = $this->productFinder->findPaginated($queryObject);
-        $paginator->setMaxPerPage($request->get('limit', $this->pagination));
-        $paginator->setCurrentPage($request->get('page', 1));
+        $paginator->setMaxPerPage($request->query->getInt('limit', $this->pagination));
+        $paginator->setCurrentPage($request->query->getInt('page', 1));
 
         try {
-            if (null === $paginator->getNbResults()) {
+            if ($paginator->getNbResults() <= 0) {
                 return null;
             }
-        } catch (ResponseException $exception) {
+        } catch (\Throwable) {
             return null;
         }
 
@@ -323,8 +292,8 @@ class SearchController extends AbstractController
     private function paginateProducts(Request $request, Query $query): Pagerfanta
     {
         $paginator = $this->productFinder->findPaginated($query);
-        $paginator->setMaxPerPage($request->get('limit', $this->pagination));
-        $paginator->setCurrentPage($request->get('page', 1));
+        $paginator->setMaxPerPage($request->query->getInt('limit', $this->pagination));
+        $paginator->setCurrentPage($request->query->getInt('page', 1));
 
         return $paginator;
     }
