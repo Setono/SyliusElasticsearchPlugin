@@ -40,6 +40,9 @@ class SetonoSyliusElasticsearchExtension extends Extension
                 ->addArgument($indexConfigs)
                 ->addArgument(new Reference('fos_elastica.persister_registry'))
                 ->addArgument(new Reference('fos_elastica.indexable'))
+                ->addTag('doctrine.event_listener', ['event' => 'postPersist'])
+                ->addTag('doctrine.event_listener', ['event' => 'postUpdate'])
+                ->addTag('doctrine.event_listener', ['event' => 'preRemove'])
             ;
         }
 

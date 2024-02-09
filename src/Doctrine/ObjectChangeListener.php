@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Setono\SyliusElasticsearchPlugin\Doctrine;
 
-use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use FOS\ElasticaBundle\Persister\PersisterRegistry;
@@ -14,7 +13,7 @@ use Sylius\Component\Product\Model\ProductAttributeValue;
 use Sylius\Component\Resource\Model\ToggleableInterface;
 use Webmozart\Assert\Assert;
 
-class ObjectChangeListener implements EventSubscriber
+class ObjectChangeListener
 {
     private string $modelClass;
 
@@ -48,15 +47,6 @@ class ObjectChangeListener implements EventSubscriber
         if ($this->getParentModel($args->getObject()) instanceof $this->modelClass) {
             $this->sendProductUpdateEvent(Events::preRemove, $args);
         }
-    }
-
-    public function getSubscribedEvents(): array
-    {
-        return [
-            Events::postPersist,
-            Events::postUpdate,
-            Events::preRemove,
-        ];
     }
 
     private function getParentModel(object $object): ?object
