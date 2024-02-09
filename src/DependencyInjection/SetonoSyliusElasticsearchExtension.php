@@ -35,6 +35,8 @@ class SetonoSyliusElasticsearchExtension extends Extension
                 $indexConfigs['type_name'],
             );
 
+            $indexConfigs['index_name'] = $indexName;
+
             $container->register($listenerId, ObjectChangeListener::class)
                 ->setPublic(true)
                 ->addArgument($indexConfigs)
