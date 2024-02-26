@@ -14,7 +14,7 @@
         "doctrine/orm": "^2.17",
         "doctrine/persistence": "^2.5",
         "friendsofsymfony/elastica-bundle": "^6.2",
-        "pagerfanta/pagerfanta": "^2.7",
+        "pagerfanta/pagerfanta": "^3.0",
         "psr/event-dispatcher": "^1.0",
         "ruflin/elastica": "^7.3",
         "sylius/channel": "^1.0",
@@ -36,7 +36,7 @@
         "loevgaard/sylius-brand-plugin": "^2.2",
         "psalm/plugin-symfony": "^5.0",
         "setono/code-quality-pack": "^2.6",
-        "sylius/sylius": "~1.10.14"
+        "sylius/sylius": "~1.11.15"
     },
     "prefer-stable": true,
     "autoload": {
